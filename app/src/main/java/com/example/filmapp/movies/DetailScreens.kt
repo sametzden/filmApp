@@ -2,8 +2,11 @@ package com.example.filmapp.movies
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberImagePainter
 import com.example.filmapp.R
@@ -52,7 +56,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                 .fillMaxSize()
             ) {
                 Image(
-                    painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
+                    painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.backdrop_path}"),
                     contentDescription = movie.title,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -86,11 +90,27 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                     modifier = Modifier.padding(bottom = 16.dp),
                     color = Color.White
                 )
+                Row {
+                    movie.genres?.forEach { genre ->
+                        GenreChip(genre.name)
+                    }
+                }
+
             }
         }
     }
 
+}@Composable
+fun GenreChip(genre: String) {
+    Box(
+        modifier = Modifier
+            .background(Color.Black)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    ) {
+        Text(text = genre, color = Color.White, fontSize = 14.sp)
+    }
 }
+
 
 
 @Composable
@@ -111,7 +131,7 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                     .fillMaxSize()
             ) {
                 Image(
-                    painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${tvShow.poster_path}"),
+                    painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${tvShow.backdrop_path}"),
                     contentDescription = tvShow.name,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -151,6 +171,10 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp), color = Color.White
                 )
+
+                tvShow.genres?.forEach { genre ->
+                    GenreChip(genre.name)
+                }
             }
         }
     }

@@ -36,9 +36,14 @@ import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
 import com.example.filmapp.movies.HomeScreen
+import com.example.filmapp.movies.MovieCategory
 import com.example.filmapp.movies.MovieDetailScreen
 
+
 import com.example.filmapp.movies.MovieViewModel
+import com.example.filmapp.movies.MovieViewModel2
+import com.example.filmapp.movies.SeeAllScreen
+
 import com.example.filmapp.movies.TVShowDetailScreen
 
 import com.example.filmapp.ui.theme.FilmAppTheme
@@ -46,6 +51,7 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val movieViewModel: MovieViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -55,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
 
                 // App'ı çağırıyoruz ve NavController'ı kullanıyoruz
-                App()
+                App(movieViewModel)
             }
                 }
             }
@@ -73,7 +79,7 @@ fun GreetingPreview() {
 }
 
 @Composable
-fun App() {
+fun App(viewModel: MovieViewModel) {
     // NavController oluşturuluyor
     val navController = rememberNavController()
 
@@ -90,6 +96,16 @@ fun App() {
             val tvShowId = backStackEntry.arguments?.getString("tvShowId")?.toInt() ?: 1
             TVShowDetailScreen(tvShowId = tvShowId)
         }
-    }
-}
+        composable("seeAllScreen/{category}") { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category") ?: "popularMovies"
+            val category = when (categoryName) {
+                "popularMovies" -> MovieCategory.POPULAR_MOVIES
+                "topRatedMovies" -> MovieCategory.TOP_RATED_MOVIES
+                "upcomingMovies" -> MovieCategory.UPCOMING_MOVIES
+                else -> MovieCategory.POPULAR_MOVIES
+            }
+            SeeAllScreen(viewModel, category, navController)
+        }
+    }}
+
 

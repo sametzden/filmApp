@@ -29,10 +29,11 @@ data class MovieDetail(
     val overview: String,
     val release_date: String,
     val poster_path: String,
+    val backdrop_path: String?,
     val runtime: Int?,  // Film süresi (dakika cinsinden)
     val vote_average: Double?, // Puan ortalaması
     val vote_count: Int?, // Puan veren kişi sayısı
-    val genres: List<Genre>
+    val genres: List<Genre>?
 )
 
 data class Genre(

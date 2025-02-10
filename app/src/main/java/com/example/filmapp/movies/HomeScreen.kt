@@ -3,6 +3,7 @@ package com.example.filmapp.movies
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,10 +20,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -36,26 +37,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 
 import com.example.filmapp.data.Movie
-import com.example.filmapp.data.MovieDetail
 import com.example.filmapp.data.TVShow
-import kotlin.reflect.typeOf
 
 @Composable
 fun HomeScreen(movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
 
-    val popularTVShows by movieViewModel.popularTVShows.observeAsState(emptyList())
-    val nowPlayingMovies by movieViewModel.nowPlayingMovies.observeAsState(emptyList())
-    val popularMovies by movieViewModel.popularMovies.observeAsState(emptyList())
+
 
     // Veriyi çek
     LaunchedEffect(Unit) {
@@ -101,7 +96,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
         TabRow(selectedTabIndex = selectedTab,Modifier.background(color = Color.Black)) {
             tabs.forEachIndexed { index, title ->
                 Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
-                    Text(title, color =  Color.White )
+                    Text(title, color =  Color.Red )
                 }
             }
         }
@@ -118,15 +113,30 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
 
 @Composable
 fun MovieList(navController: NavController, viewModel: MovieViewModel) {
-    val nowPlaying by viewModel.nowPlayingMovies.observeAsState(emptyList())
-    val populerMovies by viewModel.popularMovies1.observeAsState(emptyList())
-    val topRatedMovies by viewModel.topRatedMovies.observeAsState(emptyList())
-    val upcomingMovies by viewModel.upcomingMovies.observeAsState(emptyList())
+    val nowPlaying = viewModel.nowPlayingMovies
+    val populerMovies = viewModel.popularMovies1
+    val topRatedMovies = viewModel.topRatedMovies
+    val upcomingMovies= viewModel.upcomingMovies
 
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
-                Text("Populer Movies", color = Color.White, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Populer Movies", color = Color.White, fontSize = 18.sp)
+
+                    TextButton(onClick = {
+                        navController.navigate("seeAllScreen/popularMovies")
+
+                    }) {
+                        Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                    }
+                }
                 LazyRow {
                     items(populerMovies.take(15)) { movie ->
                         MovieItem(movie = movie, navController)
@@ -134,7 +144,22 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
                 }
             }
             item {
-                Text("Upcoming Movies", color = Color.White, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Up Coming Movies", color = Color.White, fontSize = 18.sp)
+
+                    TextButton(onClick = {
+                        viewModel._movieList = mutableStateListOf<Movie>()
+                        navController.navigate("seeAllScreen/upcomingMovies")
+                    }) {
+                        Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                    }
+                }
                 LazyRow {
                     items(upcomingMovies.take(15)) { movie ->
                         MovieItem(movie = movie, navController)
@@ -142,7 +167,21 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
                 }
             }
             item {
-                Text("Top Rated Movies", color = Color.White, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Top Rated Movies", color = Color.White, fontSize = 18.sp)
+
+                    TextButton(onClick = {viewModel._movieList = mutableStateListOf<Movie>()
+                        navController.navigate("seeAllScreen/topRatedMovies")
+                    }) {
+                        Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                    }
+                }
                 LazyRow {
                     items(topRatedMovies.take(15)) { movie ->
                         MovieItem(movie = movie, navController)
@@ -152,7 +191,7 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
             item {
                 Text("Now Playing", color = Color.White, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
                 LazyRow {
-                    items(nowPlaying.take(15)) { movie ->
+                    items(nowPlaying) { movie ->
                         MovieItem(movie = movie, navController)
                     }
                 }
@@ -166,10 +205,10 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
 }
 @Composable
 fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
-    val popularShows by viewModel.popularTVShows1.observeAsState(emptyList())
-    val topRatedTVShows by viewModel.topRatedTVShows.observeAsState(emptyList())
-    val nowPlayingTVShows by viewModel.nowPlayingTVShows.observeAsState(emptyList())
-    val upcomingTVShows by viewModel.upcomingTVShows.observeAsState(emptyList())
+    val popularShows = viewModel.popularTVShows1
+    val topRatedTVShows =viewModel.topRatedTVShows
+    val nowPlayingTVShows  =viewModel.nowPlayingTVShows
+    val upcomingTVShows  =viewModel.upcomingTVShows
 
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
 
