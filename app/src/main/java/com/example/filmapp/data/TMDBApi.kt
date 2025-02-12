@@ -32,6 +32,35 @@ interface TMDBApi {
         @Query("language") language: String = "tr-TR"
     ): Response<TVShowDetail>
 
+    // oyuncuları çek
+    @GET("movie/{movie_id}/credits")
+    suspend fun getMovieCredits(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "tr-TR"
+    ): CreditsResponse
+    @GET("tv/{tvshow_id}/credits")
+    suspend fun getTVShowCredits(
+        @Path("tvshow_id") tvShowId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "tr-TR"
+    ): CreditsResponse
+    @GET("person/{person_id}")
+    suspend fun getActorDetails(
+        @Path("person_id") personId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "tr-TR"
+    ): Actor
+    @GET("person/{person_id}/movie_credits")
+    suspend fun getActorMovies(
+        @Path("person_id") personId: Int,
+        @Query("api_key") apiKey: String
+    ): ActorMoviesResponse
+    @GET("person/{person_id}/tv_credits")
+    suspend fun getActorShows(
+        @Path("person_id") personId: Int,
+        @Query("api_key") apiKey: String
+    ): ActorTVShowsResponse
 
     // Filmler
     @GET("movie/now_playing")
@@ -84,6 +113,7 @@ interface TMDBApi {
         @Query("page") page: Int
     ): TVShowResponse
 
+    // search
     @GET("search/movie")
     suspend fun searchMovies(
         @Query("api_key") apiKey: String,
@@ -99,6 +129,13 @@ interface TMDBApi {
         @Query("language") language: String = "tr-TR",
 
     ): TVShowResponse
+    @GET("search/person")
+    suspend fun searchPeople(
+        @Query("api_key") apiKey: String,
+        @Query("query") query: String,
+        @Query("language") language: String = "tr-TR"
+    ): PeopleResponse
+
 }
 
 

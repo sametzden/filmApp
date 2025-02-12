@@ -1,5 +1,7 @@
 package com.example.filmapp.data
 
+import com.google.gson.annotations.SerializedName
+
 data class MovieResponse(
     var results: List<Movie>
 )
@@ -12,6 +14,7 @@ interface MediaItem {
     val vote_average: Double?
     val genres: List<Genre>?
 }
+
 data class Movie(
     override val id: Int,
     override val title: String?,
@@ -25,7 +28,15 @@ data class Movie(
 data class TVShowResponse(
     var results: List<TVShow>
 )
+data class ActorMoviesResponse(
+    val id: Int,
+    val cast: List<Movie>
+)
 
+data class ActorTVShowsResponse(
+    val id: Int,
+    val cast: List<TVShow>
+)
 data class TVShow(
     override val id: Int,
     override val name: String?,
@@ -46,7 +57,8 @@ data class MovieDetail(
     val runtime: Int?,  // Film süresi (dakika cinsinden)
     val vote_average: Double?, // Puan ortalaması
     val vote_count: Int?, // Puan veren kişi sayısı
-    val genres: List<Genre>?
+    val genres: List<Genre>
+
 )
 
 data class Genre(
@@ -71,3 +83,45 @@ data class TVShowDetail(
     val genres: List<Genre>?,
     val status: String?
 )
+data class Actor(
+    val id: Int,
+    val name: String,
+    val biography: String?,
+    val birthday: String?,
+    val placeOfBirth: String?,
+    @SerializedName("profile_path")val profilePath: String?
+)
+
+
+data class CreditsResponse(
+    val cast: List<CastMember>
+)
+
+data class CastMember(
+    val id: Int,
+    val name: String,
+    val character: String,
+    @SerializedName("profile_path") val profilePath: String,
+    val popularity: Double
+)
+data class Person(
+    override val id: Int,
+    override val name: String,
+    @SerializedName("profile_path") val profilePath: String?,
+    override val popularity: Double,
+    @SerializedName("known_for") val knownFor: List<KnownFor>,
+    override val title: String?,
+    override val poster_path: String,
+    override val vote_average: Double?,
+    override val genres: List<Genre>?
+) : MediaItem
+
+data class KnownFor(
+    val title: String?,
+    @SerializedName("media_type") val mediaType: String
+)
+data class PeopleResponse(
+    val results: List<Person>
+)
+
+

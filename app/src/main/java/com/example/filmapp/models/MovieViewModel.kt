@@ -1,22 +1,23 @@
-package com.example.filmapp.movies
+package com.example.filmapp.models
 
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.filmapp.data.Actor
+import com.example.filmapp.data.CastMember
 import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.MovieAPI
 import com.example.filmapp.data.MovieDetail
 import com.example.filmapp.data.TVShow
+
 import com.example.filmapp.data.TVShowDetail
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -143,6 +144,7 @@ class MovieViewModel : ViewModel() {
             val response = MovieAPI.RetrofitClient.api.getMovieDetails(movieId, apiKey)
             if (response.isSuccessful) {
                 _movieDetail.postValue(response.body())
+
             } else {
                 // Hata yönetimi
             }
@@ -159,12 +161,74 @@ class MovieViewModel : ViewModel() {
                 val response = MovieAPI.RetrofitClient.api.getTVShowDetails(tvShowId,apiKey)
                 if (response.isSuccessful) {
                     _tvShowDetail.value = response.body()
+
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
+
+
+    private val _cast = mutableStateOf<List<CastMember>>(emptyList())
+    val cast: State<List<CastMember>> = _cast
+
+    fun fetchMovieCredits(movieId: Int,apiKey: String) {
+        viewModelScope.launch {
+            try {
+                val response = MovieAPI.RetrofitClient.api.getMovieCredits(movieId, apiKey)
+                _cast.value = response.cast.sortedByDescending { it.popularity }
+
+            } catch (e: Exception) {
+                Log.e("MovieDetailVM", "Error fetching cast", e)
+            }
+        }
+    }
+
+    private val _showCast = mutableStateOf<List<CastMember>>(emptyList())
+    val showCast: State<List<CastMember>> = _showCast
+
+    fun fetchShowCredits(showId: Int,apiKey: String) {
+        viewModelScope.launch {
+            try {
+                val response = MovieAPI.RetrofitClient.api.getTVShowCredits(showId, apiKey)
+                _showCast.value = response.cast.sortedByDescending { it.popularity }
+
+            } catch (e: Exception) {
+                Log.e("MovieDetailVM", "Error fetching cast", e)
+            }
+        }
+    }
+
+
+
+
+    private val _actorDetails = mutableStateOf<Actor?>(null)
+    val actorDetails: State<Actor?> = _actorDetails
+
+    private val _actorMovies = mutableStateOf<List<Movie>>(emptyList())
+    val actorMovies: State<List<Movie>> = _actorMovies
+
+    private val _actorTVShows = mutableStateOf<List<TVShow>>(emptyList())
+    val actorTVShows: State<List<TVShow>> = _actorTVShows
+    fun fetchActorDetails(actorId: Int) {
+        viewModelScope.launch {
+            try {
+                _actorDetails.value = MovieAPI.RetrofitClient.api.getActorDetails(actorId, apiKey)
+                _actorMovies.value  = MovieAPI.RetrofitClient.api.getActorMovies(actorId, apiKey).cast.sortedByDescending {
+                    it.popularity
+                }
+                _actorTVShows.value = MovieAPI.RetrofitClient.api.getActorShows(actorId, apiKey).cast.sortedByDescending {
+                    it.popularity
+                }
+            } catch (e: Exception) {
+                Log.e("ActorDetailVM", "Error fetching actor details", e)
+            }
+        }
+    }
+
+
+
 
 
     private var _selectedCategory = MutableLiveData<MovieCategory?>(null)
@@ -218,7 +282,7 @@ class MovieViewModel : ViewModel() {
             try {
                 val response = when (_selectedCategory.value) {
                     MovieCategory.POPULAR_TVSHOWS -> MovieAPI.RetrofitClient.api.getPopularTVShows(apiKey, page =  currentPage)
-                    MovieCategory.TOP_RATED_TVSHOWS-> MovieAPI.RetrofitClient.api.getTopRatedTVShows(apiKey, page =  currentPage)
+                    MovieCategory.TOP_RATED_TVSHOWS -> MovieAPI.RetrofitClient.api.getTopRatedTVShows(apiKey, page =  currentPage)
                     MovieCategory.NOW_PLAYING_TVSHOWS -> MovieAPI.RetrofitClient.api.getNowPlayingTVShows(apiKey, page = currentPage)
                     else -> null
                 }

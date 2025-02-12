@@ -26,11 +26,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -42,23 +39,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.Movie
+import com.example.filmapp.data.Person
 import com.example.filmapp.data.TVShow
+import com.example.filmapp.models.MovieViewModel
+import com.example.filmapp.models.SearchViewModel
 
 
 @Composable
@@ -175,30 +168,42 @@ fun SearchResultItem(item: MediaItem, navController: NavController) {
                     navController.navigate("movieDetail/${item.id}")
                 } else if (item is TVShow) {
                     navController.navigate("tvShowDetail/${item.id}")
+                }else if (item is Person){
+                    navController.navigate ("actorDetail/${item.id}")
                 }
             }
             .padding(16.dp)
     ) {
-        AsyncImage(
-            model = "https://image.tmdb.org/t/p/w500${item.poster_path}",
-            contentDescription = null,
-            modifier = Modifier.size(80.dp)
-        )
+        if(item is Person){
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${item.profilePath}",
+                contentDescription = null,
+                modifier = Modifier.size(80.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            item.name.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
+        }else{
+            AsyncImage(
+                model = "https://image.tmdb.org/t/p/w500${item.poster_path}",
+                contentDescription = null,
+                modifier = Modifier.size(80.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                if (item is Movie) {
+                    item.title?.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
+
+                } else if (item is TVShow) {
+                    item.name?.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
+                }
+                Text(text ="Rating is " + item.vote_average?.toInt().toString(), fontSize = 18.sp, color = Color.White)
 
 
-
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            if (item is Movie) {
-                item.title?.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
-
-            } else if (item is TVShow) {
-                item.name?.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
             }
-            Text(text ="Rating is " + item.vote_average?.toInt().toString(), fontSize = 18.sp, color = Color.White)
-
-
         }
+
+
 
 
 
@@ -498,7 +503,7 @@ fun NowPlayingShowSection(
 
 
 @Composable
-fun MovieItem(movie: Movie,navController: NavController) {
+fun MovieItem(movie: Movie, navController: NavController) {
     // Yatay listede her öğe için bir Row oluşturuyoruz
     Column(
         modifier = Modifier
@@ -509,8 +514,10 @@ fun MovieItem(movie: Movie,navController: NavController) {
                 navController.navigate("movieDetail/${movie.id}")
             }// Poster genişliğini sabit tutuyoruz
     ) {
+
         // Filmin posterini gösteriyoruz
         Image(
+
             painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
             contentDescription = movie.title,
             modifier = Modifier
@@ -522,16 +529,18 @@ fun MovieItem(movie: Movie,navController: NavController) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Filmin adı
-        movie.title?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                modifier = Modifier.padding(horizontal = 4.dp)
-            )
-        }
+            // Filmin adı
+            movie.title?.let {
+                Text(
+                    text = it,
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+            }
+
+
     }
 }
 

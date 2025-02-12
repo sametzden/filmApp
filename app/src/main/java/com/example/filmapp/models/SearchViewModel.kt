@@ -1,4 +1,4 @@
-package com.example.filmapp.movies
+package com.example.filmapp.models
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.MovieAPI
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SearchViewModel: ViewModel() {
@@ -18,7 +17,8 @@ class SearchViewModel: ViewModel() {
             try {
                 val movieResponse = MovieAPI.RetrofitClient.api.searchMovies(apiKey,query =  query)
                 val tvResponse = MovieAPI.RetrofitClient.api.searchTVShows(apiKey, query = query)
-                val allResults: List<MediaItem> = (movieResponse.results + tvResponse.results)
+                val peopleResponse = MovieAPI.RetrofitClient.api.searchPeople(apiKey, query = query)
+                val allResults: List<MediaItem> = (movieResponse.results + tvResponse.results+peopleResponse.results)
                     .sortedByDescending { it.popularity }  // Popülerliğe göre sırala
 
                 _searchResults.value = allResults.take(5) // İlk 5 sonucu göster
