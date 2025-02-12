@@ -77,20 +77,30 @@ interface TMDBApi {
         @Query("page") page: Int
     ): TVShowResponse
 
-    @GET("tv/on_the_air")
+    @GET("tv/airing_today")
     suspend fun getNowPlayingTVShows(
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "tr-TR",
         @Query("page") page: Int
     ): TVShowResponse
 
-    @GET("tv/airing_today")
-    suspend fun getUpcomingTVShows(
+    @GET("search/movie")
+    suspend fun searchMovies(
         @Query("api_key") apiKey: String,
+        @Query("query") query: String,
         @Query("language") language: String = "tr-TR",
-        @Query("page") page: Int
-    ): TVShowResponse
 
+    ): MovieResponse
+
+    @GET("search/tv")
+    suspend fun searchTVShows(
+        @Query("api_key") apiKey: String,
+        @Query("query") query: String,
+        @Query("language") language: String = "tr-TR",
+
+    ): TVShowResponse
 }
+
+
 
 

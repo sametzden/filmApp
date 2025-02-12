@@ -1,6 +1,8 @@
 package com.example.filmapp.movies
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -10,15 +12,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.MovieAPI
 import com.example.filmapp.data.MovieDetail
 import com.example.filmapp.data.TVShow
 import com.example.filmapp.data.TVShowDetail
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+
 enum class MovieCategory {
-    POPULAR_MOVIES, UPCOMING_MOVIES, TOP_RATED_MOVIES,
-    POPULAR_TVSHOWS, TOP_RATED_TVSHOWS, UPCOMING_TVSHOWS
+    POPULAR_MOVIES, UPCOMING_MOVIES, TOP_RATED_MOVIES,NOW_PLAYING_MOVIES,
+    POPULAR_TVSHOWS, TOP_RATED_TVSHOWS, UPCOMING_TVSHOWS,NOW_PLAYING_TVSHOWS
 }
 
 class MovieViewModel : ViewModel() {
@@ -44,15 +49,27 @@ class MovieViewModel : ViewModel() {
         fetchNowPlayingMovies()
         fetchPopularMovies()
         fetchTopRatedMovies()
-        fetchUpcomingMovies()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            fetchUpcomingMovies()
 
+        }
         fetchPopularTVShows()
         fetchTopRatedTVShows()
         fetchNowPlayingTVShows()
-        fetchUpcomingTVShows()
     }
-
-     fun fetchNowPlayingMovies() {
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun filterMoviesByReleaseDate(movies: List<Movie>): List<Movie> {
+        val today = LocalDate.now()  // Bugünün tarihi
+        return movies.filter { movie ->
+            try {
+                val releaseDate = LocalDate.parse(movie.release_date)  // Yayın tarihini al
+                releaseDate.isAfter(today.minusDays(1))  // Bugünden önceyse gösterme
+            } catch (e: Exception) {
+                false  // Hatalı tarih formatı varsa direkt ele
+            }
+        }
+    }
+    fun fetchNowPlayingMovies() {
         viewModelScope.launch {
 
             val response = MovieAPI.RetrofitClient.api.getNowPlayingMovies(apiKey, page = currentPage)
@@ -76,12 +93,18 @@ class MovieViewModel : ViewModel() {
         }
     }
 
+
      fun fetchUpcomingMovies() {
         viewModelScope.launch {
-            val response = MovieAPI.RetrofitClient.api.getUpcomingMovies(apiKey, page = currentPage)
-            upcomingMovies.addAll(response.results)
-
-
+            for (page in 1..5){
+                val response = MovieAPI.RetrofitClient.api.getUpcomingMovies(apiKey, page = page)
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val filteredMovies = filterMoviesByReleaseDate(response.results)
+                    upcomingMovies.addAll(filteredMovies)
+                }else{
+                    upcomingMovies.addAll(response.results)
+                }
+            }
         }
     }
 
@@ -108,13 +131,8 @@ class MovieViewModel : ViewModel() {
         }
     }
 
-     fun fetchUpcomingTVShows() {
-        viewModelScope.launch {
-            val response = MovieAPI.RetrofitClient.api.getUpcomingTVShows(apiKey, page = currentPage)
-            upcomingTVShows.addAll(response.results)
 
-        }
-    }
+
     private val _movieDetail = MutableLiveData<MovieDetail>()
     val movieDetail: LiveData<MovieDetail> = _movieDetail
 
@@ -149,10 +167,6 @@ class MovieViewModel : ViewModel() {
     }
 
 
-
-
-
-
     private var _selectedCategory = MutableLiveData<MovieCategory?>(null)
     val selectedCategory: LiveData<MovieCategory?> = _selectedCategory
 
@@ -164,21 +178,54 @@ class MovieViewModel : ViewModel() {
 
         loadMovies()
     }
+    fun selectTvCategory(category: MovieCategory) {
+        _selectedCategory.value = category
+        currentPage = 1
+
+        loadMoreTvShows()
+    }
+
     var _movieList = mutableStateListOf<Movie>()
-    // 📌 Sonsuz kaydırma ile veri yükleme
+
     fun loadMovies() {
         viewModelScope.launch {
             try {
                 val response = when (_selectedCategory.value) {
                     MovieCategory.POPULAR_MOVIES -> MovieAPI.RetrofitClient.api.getPopularMovies(apiKey, page =  currentPage)
-                    MovieCategory.UPCOMING_MOVIES -> MovieAPI.RetrofitClient.api.getUpcomingMovies(apiKey, page =  currentPage)
                     MovieCategory.TOP_RATED_MOVIES -> MovieAPI.RetrofitClient.api.getTopRatedMovies(apiKey, page =  currentPage)
+                    MovieCategory.NOW_PLAYING_MOVIES -> MovieAPI.RetrofitClient.api.getNowPlayingMovies(apiKey, page = currentPage)
+                    else -> null
+                }
+                response?.let {
+                    val currentMovies = _movieList
+                    _movieList.addAll( it.results)
+                    currentPage++
+                }
+
+
+            } catch (e: Exception) {
+                println("Hata: ${e.message}")
+            } finally {
+
+            }
+        }
+    }
+    var _tvShowList = mutableStateListOf<TVShow>()
+
+    fun loadMoreTvShows() {
+
+        viewModelScope.launch {
+            try {
+                val response = when (_selectedCategory.value) {
+                    MovieCategory.POPULAR_TVSHOWS -> MovieAPI.RetrofitClient.api.getPopularTVShows(apiKey, page =  currentPage)
+                    MovieCategory.TOP_RATED_TVSHOWS-> MovieAPI.RetrofitClient.api.getTopRatedTVShows(apiKey, page =  currentPage)
+                    MovieCategory.NOW_PLAYING_TVSHOWS -> MovieAPI.RetrofitClient.api.getNowPlayingTVShows(apiKey, page = currentPage)
                     else -> null
                 }
 
                 response?.let {
-                    val currentMovies = _movieList
-                    _movieList.addAll( it.results)
+                    val currentTVShow = _tvShowList
+                    _tvShowList.addAll( it.results)
                     currentPage++
                 }
             } catch (e: Exception) {
@@ -188,39 +235,46 @@ class MovieViewModel : ViewModel() {
             }
         }
     }
-    private val _tvShowList = mutableStateListOf<TVShow>()
 
-    fun loadMoreTvShows() {
+
+    private val _searchResults = mutableStateOf<List<MediaItem>>(emptyList())
+    val searchResults: State<List<MediaItem>> = _searchResults
+
+    private val _searchQuery = mutableStateOf("")
+    val searchQuery: State<String> = _searchQuery
+
+    fun searchMovies(query: String) {
+        _searchQuery.value = query
 
         viewModelScope.launch {
             try {
-                val response = MovieAPI.RetrofitClient.api.getPopularTVShows(apiKey, page = currentPage)
-                _tvShowList.addAll(response.results)  // Yeni filmleri ekle
-                currentPage++  // Sayfa numarasını artır
+                if (query.isNotEmpty()) {
+                    val movieResponse = MovieAPI.RetrofitClient.api.searchMovies(apiKey = apiKey, query = query)
+                    val tvResponse = MovieAPI.RetrofitClient.api.searchTVShows(apiKey = apiKey, query = query)
+                    val allResults = (movieResponse.results+tvResponse.results).sortedByDescending { it.popularity }
+                   _searchResults.value = allResults.take(5) // İlk 5 sonucu al
+                } else {
+                    _searchResults.value = emptyList()
+                }
             } catch (e: Exception) {
                 println("Hata: ${e.message}")
-            } finally {
-
             }
         }
     }
 
 
 
-}
-
-
-
-
-
-
-
-
-
-class MovieViewModel2 : ViewModel() {
-
 
 }
+
+
+
+
+
+
+
+
+
 
 
 

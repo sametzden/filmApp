@@ -25,10 +25,13 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.example.filmapp.data.Movie
 
 @Composable
-fun SeeAllScreen(viewModel: MovieViewModel, category: MovieCategory, navController: NavController) {
+fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory, navController: NavController) {
+
     val movies = viewModel._movieList
     DisposableEffect(Unit) {
         onDispose {
@@ -55,6 +58,46 @@ fun SeeAllScreen(viewModel: MovieViewModel, category: MovieCategory, navControll
             item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
                 Button(
                     onClick = { viewModel.loadMovies() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = ButtonDefaults.buttonColors(Color.Red)
+                ) {
+                    Text("Daha Fazla Yükle", color = Color.White)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory, navController: NavController) {
+    val shows = viewModel._tvShowList
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel._tvShowList.clear() // Kullanıcı geri döndüğünde listeyi temizle
+        }
+    }
+    LaunchedEffect(category) {
+        viewModel.selectTvCategory(category) // Seçili kategoriye göre veri çek
+    }
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+            modifier = Modifier.fillMaxSize()
+        ) {
+            items(shows) { show ->
+                TVShowItem(
+                    tvShow = show,
+                    navController = navController,
+                    )
+            }
+
+            item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
+                Button(
+                    onClick = { viewModel.loadMoreTvShows() },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),

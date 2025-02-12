@@ -41,8 +41,10 @@ import com.example.filmapp.movies.MovieDetailScreen
 
 
 import com.example.filmapp.movies.MovieViewModel
-import com.example.filmapp.movies.MovieViewModel2
-import com.example.filmapp.movies.SeeAllScreen
+
+import com.example.filmapp.movies.SeeAllMoviesScreen
+import com.example.filmapp.movies.SeeAllTVShowsScreen
+
 
 import com.example.filmapp.movies.TVShowDetailScreen
 
@@ -57,11 +59,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             FilmAppTheme {
-                // NavController'ı oluşturuyoruz
-                val navController = rememberNavController()
-
-                // App'ı çağırıyoruz ve NavController'ı kullanıyoruz
-                App(movieViewModel)
+                App(viewModel = movieViewModel)
             }
                 }
             }
@@ -86,7 +84,7 @@ fun App(viewModel: MovieViewModel) {
     // NavHost ile yönlendirme yapılacak
     NavHost(navController = navController, startDestination = "homeScreen") {
         composable("homeScreen") {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, viewModel = viewModel)
         }
         composable("movieDetail/{movieId}") { backStackEntry ->
             val movieId = backStackEntry.arguments?.getString("movieId")?.toInt() ?: 1
@@ -102,9 +100,20 @@ fun App(viewModel: MovieViewModel) {
                 "popularMovies" -> MovieCategory.POPULAR_MOVIES
                 "topRatedMovies" -> MovieCategory.TOP_RATED_MOVIES
                 "upcomingMovies" -> MovieCategory.UPCOMING_MOVIES
+                "nowPlayingMovies" -> MovieCategory.NOW_PLAYING_MOVIES
                 else -> MovieCategory.POPULAR_MOVIES
             }
-            SeeAllScreen(viewModel, category, navController)
+            SeeAllMoviesScreen(viewModel, category, navController)
+        }
+        composable("seeAllTVShowsScreen/{category}") { backStackEntry ->
+            val categoryName = backStackEntry.arguments?.getString("category") ?: "popularMovies"
+            val category = when (categoryName) {
+                "popularShows" -> MovieCategory.POPULAR_TVSHOWS
+                "topRatedShows" -> MovieCategory.TOP_RATED_TVSHOWS
+                "nowPlayingShows" -> MovieCategory.NOW_PLAYING_TVSHOWS
+                else -> MovieCategory.POPULAR_MOVIES
+            }
+            SeeAllTVShowsScreen(viewModel, category, navController)
         }
     }}
 
