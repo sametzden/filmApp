@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -58,6 +59,9 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation ("com.google.firebase:firebase-auth-ktx:23.2.0")
+    implementation ("com.google.android.gms:play-services-auth:21.3.0")
 
     implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
     implementation ("androidx.navigation:navigation-compose:2.8.6") // Navigation Compose
@@ -69,5 +73,6 @@ dependencies {
     implementation ("com.squareup.okhttp3:okhttp:4.9.2")
 
     // Coil - Görselleri yüklemek için
-    implementation ("io.coil-kt:coil-compose:2.0.0")
+    implementation ("io.coil-kt:coil-compose:2.5.0")
+
 }

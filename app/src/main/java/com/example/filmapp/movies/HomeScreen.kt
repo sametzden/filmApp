@@ -1,5 +1,6 @@
 package com.example.filmapp.movies
 
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -13,18 +14,29 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.BottomSheetScaffold
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,11 +51,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.example.filmapp.data.MediaItem
@@ -52,6 +66,7 @@ import com.example.filmapp.data.Person
 import com.example.filmapp.data.TVShow
 import com.example.filmapp.models.MovieViewModel
 import com.example.filmapp.models.SearchViewModel
+import com.example.filmapp.presentation.sign_in.UserData
 
 
 @Composable
@@ -64,12 +79,31 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Üst Kısım (Başlık + Arama Çubuğu)
+
             Spacer(Modifier.size(40.dp))
-            Text(
-                "What do you want to watch?", color = Color.White, fontSize = 22.sp,
-                modifier = Modifier.padding(top = 30.dp, bottom = 15.dp, start = 60.dp)
-            )
-            // 🔍 **Arama Çubuğunu üstte sabit tutup aşağı kaymasını engelleyelim**
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ){
+                Text(
+                    "What do you want to watch?", color = Color.White, fontSize = 22.sp,
+                    modifier = Modifier.padding(top = 30.dp, bottom = 15.dp, start = 60.dp)
+                )
+                IconButton(onClick = { navController.navigate("profile") }) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Profile",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp).padding(top = 3.dp)
+                    )
+                }
+
+            }
+
+
             SearchScreen(
                 searchViewModel,
                 navController,
@@ -91,6 +125,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
                         }
                     }
                 }
+
 
                 // Seçili Sekmeye Göre İçerik
                 if (selectedTab == 0) {
@@ -578,5 +613,89 @@ fun TVShowItem(tvShow: TVShow,navController: NavController) {
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
         }
+
     }
 }
+
+sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
+    object Home : BottomNavItem("homeScreen", Icons.Default.Home, "Home")
+    object Profile : BottomNavItem("profile", Icons.Default.Person, "Profile")
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val items = listOf(
+        BottomNavItem.Home,
+        BottomNavItem.Profile
+    )
+    var isSheetOpen by remember { mutableStateOf(false) }
+    val modalBottomSheetState = rememberModalBottomSheetState()
+    if (isSheetOpen) {
+        ModalBottomSheet(
+            sheetState = modalBottomSheetState,
+            onDismissRequest = { isSheetOpen = false }
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text("Home", modifier = Modifier.clickable {
+                    navController.navigate("homeScreen")
+                    isSheetOpen = false
+                })
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Profile", modifier = Modifier.clickable {
+                    navController.navigate("profile")
+                    isSheetOpen = false
+                })
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PersistentBottomSheet(navController: NavController) {
+    BottomSheetScaffold(
+        sheetContent = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Navigation", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { navController.navigate("homeScreen") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Home")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = { navController.navigate("profile") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Profile")
+                }
+            }
+        },
+        sheetPeekHeight = 100.dp // Alt kısımda sürekli görünür olacak yükseklik
+    ) { paddingValues ->
+        // Ana içeriğin buraya gelecek
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("Main Content", fontSize = 24.sp)
+        }
+    }
+}
+

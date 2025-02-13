@@ -61,6 +61,7 @@ import com.example.filmapp.data.CastMember
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.TVShow
 import com.example.filmapp.models.MovieViewModel
+import com.google.firebase.Firebase
 
 
 @Composable
@@ -289,7 +290,6 @@ fun ActorDetailScreen(actorId: Int, navController: NavController) {
     val actorTVShows by viewModel.actorTVShows
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
-
     LaunchedEffect(actorId) {
         viewModel.fetchActorDetails(actorId)
     }
