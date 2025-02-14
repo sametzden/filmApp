@@ -1,6 +1,5 @@
-package com.example.filmapp.movies
+package com.example.filmapp.view
 
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.paddingFrom
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -57,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.example.filmapp.data.MediaItem
@@ -66,7 +63,7 @@ import com.example.filmapp.data.Person
 import com.example.filmapp.data.TVShow
 import com.example.filmapp.models.MovieViewModel
 import com.example.filmapp.models.SearchViewModel
-import com.example.filmapp.presentation.sign_in.UserData
+import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
@@ -75,7 +72,8 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
     val tabs = listOf("Movies", "TV Shows")
     val searchViewModel = SearchViewModel()
     var isSearchActive by remember { mutableStateOf(false) } // Arama açık mı kontrolü
-
+    var currentUser =FirebaseAuth.getInstance().currentUser
+   println(currentUser?.displayName.toString() + "homescreen cagırıldı")
     Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Üst Kısım (Başlık + Arama Çubuğu)
@@ -133,6 +131,8 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
                 } else {
                     TVShowList(navController, viewModel)
                 }
+
+
             }
         }
     }
@@ -571,7 +571,9 @@ fun MovieItem(movie: Movie, navController: NavController) {
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                    color = Color.White
+
                 )
             }
 
@@ -610,7 +612,8 @@ fun TVShowItem(tvShow: TVShow,navController: NavController) {
                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                modifier = Modifier.padding(horizontal = 4.dp)
+                modifier = Modifier.padding(horizontal = 4.dp),
+                color = Color.White
             )
         }
 

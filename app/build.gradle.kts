@@ -51,6 +51,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -58,21 +59,21 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation ("com.google.firebase:firebase-auth-ktx:23.2.0")
-    implementation ("com.google.android.gms:play-services-auth:21.3.0")
-
-    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
-    implementation ("androidx.navigation:navigation-compose:2.8.6") // Navigation Compose
+    implementation(libs.androidx.material)
+    implementation (libs.androidx.lifecycle.runtime.compose)
+    implementation (libs.firebase.auth.ktx)
+    implementation (libs.play.services.auth)
+    implementation(libs.androidx.material.icons.extended)
+    implementation (libs.androidx.lifecycle.viewmodel.compose)
+    implementation (libs.androidx.navigation.compose) // Navigation Compose
     // Retrofit, Gson, Moshi
-    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
 
     // OkHttp (Retrofit için)
-    implementation ("com.squareup.okhttp3:okhttp:4.9.2")
+    implementation (libs.okhttp)
 
     // Coil - Görselleri yüklemek için
-    implementation ("io.coil-kt:coil-compose:2.5.0")
+    implementation (libs.coil.compose)
 
 }

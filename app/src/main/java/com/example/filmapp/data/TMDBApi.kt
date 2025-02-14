@@ -24,7 +24,18 @@ interface TMDBApi {
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "tr-TR"
     ): Response<MovieDetail>
-
+    @GET("movie/{movie_id}")
+    suspend fun getMovie(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "tr-TR"
+    ): Response<movieForSave>
+    @GET("tv/{tvshow_id}")
+    suspend fun getTvShow(
+        @Path("tvshow_id") tvShowId: Int,
+        @Query("api_key") apiKey: String,
+        @Query("language") language: String = "tr-TR"
+    ): Response<showForSave>
     @GET("tv/{tvshow_id}")
     suspend fun getTVShowDetails(
         @Path("tvshow_id") tvShowId: Int,

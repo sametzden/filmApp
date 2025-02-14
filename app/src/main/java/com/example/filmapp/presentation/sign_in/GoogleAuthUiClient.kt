@@ -11,6 +11,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.firebase.Firebase
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.tasks.await
 import okhttp3.internal.wait
 
@@ -68,6 +69,13 @@ class GoogleAuthUiClient(
         try {
             oneTapClient.signOut().await()
             auth.signOut()
+            // Firebase'in gerçekten güncellendiğinden emin olmak için bekleyelim
+            repeat(5) { // 5 defaya kadar deneme yap
+                delay(500) // 500ms bekle
+                if (auth.currentUser == null) {
+                    return // Kullanıcı gerçekten null olduysa çık
+                }
+            }
         }catch (e : Exception)
         {
             e.printStackTrace()

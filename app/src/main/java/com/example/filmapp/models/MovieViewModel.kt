@@ -19,15 +19,22 @@ import com.example.filmapp.data.MovieDetail
 import com.example.filmapp.data.TVShow
 
 import com.example.filmapp.data.TVShowDetail
+import com.example.filmapp.data.movieForSave
+import com.example.filmapp.data.repository.FirestoreRepository
+import com.example.filmapp.data.showForSave
+import com.google.firebase.Firebase
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 enum class MovieCategory {
     POPULAR_MOVIES, UPCOMING_MOVIES, TOP_RATED_MOVIES,NOW_PLAYING_MOVIES,
-    POPULAR_TVSHOWS, TOP_RATED_TVSHOWS, UPCOMING_TVSHOWS,NOW_PLAYING_TVSHOWS
+    POPULAR_TVSHOWS, TOP_RATED_TVSHOWS,NOW_PLAYING_TVSHOWS
 }
 
-class MovieViewModel : ViewModel() {
+class MovieViewModel: ViewModel() {
     private val _popularMovies = MutableLiveData<List<Movie>>()
     val popularMovies: LiveData<List<Movie>> get() = _popularMovies
 
@@ -36,17 +43,29 @@ class MovieViewModel : ViewModel() {
 
     private val apiKey = "6d8b9e531b047e3bdd803b9979082c51"
 
+    private var _userId = MutableLiveData<String?>()
+    val userId: LiveData<String?> = _userId
+    private val auth = Firebase.auth
+
+    private val authStateListener = FirebaseAuth.AuthStateListener {
+        _userId.value = it.currentUser?.uid
+    }
     private var currentPage = 1
     var nowPlayingMovies = mutableStateListOf<Movie>()
     var popularMovies1 =mutableStateListOf<Movie>()
     var topRatedMovies =mutableStateListOf<Movie>()
     var upcomingMovies =mutableStateListOf<Movie>()
-
+    private val repository = FirestoreRepository()
     var popularTVShows1= mutableStateListOf<TVShow>()
     var topRatedTVShows = mutableStateListOf<TVShow>()
     var nowPlayingTVShows = mutableStateListOf<TVShow>()
-    var upcomingTVShows= mutableStateListOf<TVShow>()
+
+    private val _savedMovies = MutableLiveData<List<movieForSave>>()
+    private val _savedTvShows = MutableLiveData<List<showForSave>>()
     init {
+        // Firebase'den güncel kullanıcıyı al
+        _userId.value = FirebaseAuth.getInstance().currentUser?.uid
+        auth.addAuthStateListener(authStateListener)
         fetchNowPlayingMovies()
         fetchPopularMovies()
         fetchTopRatedMovies()
@@ -54,10 +73,37 @@ class MovieViewModel : ViewModel() {
             fetchUpcomingMovies()
 
         }
+
+
         fetchPopularTVShows()
         fetchTopRatedTVShows()
         fetchNowPlayingTVShows()
     }
+    fun savedItems(){
+
+        repository.getSavedMovies{ movie ->
+            println("saved movies calıstı")
+            _savedMovies.postValue(movie)
+        }
+
+        // Kaydedilen TV şovlarını dinle
+        repository.getSavedTvShows { tvShows ->
+            _savedTvShows.postValue(tvShows)
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        auth.removeAuthStateListener(authStateListener)
+    }
+    fun updateUserId() {
+        _userId.value = FirebaseAuth.getInstance().currentUser?.uid
+        println("updateUserId çağrıldı, yeni userId: ${_userId.value}")
+    }
+    // Kaydedilen filmler
+    val savedMovies: LiveData<List<movieForSave>> get() = _savedMovies
+    // Kaydedilen TV şovları
+    val savedTvShows: LiveData<List<showForSave>> get() = _savedTvShows
     @RequiresApi(Build.VERSION_CODES.O)
     fun filterMoviesByReleaseDate(movies: List<Movie>): List<Movie> {
         val today = LocalDate.now()  // Bugünün tarihi
@@ -151,7 +197,43 @@ class MovieViewModel : ViewModel() {
 
         }
     }
+    private val _movieForSave = MutableLiveData<movieForSave>()
+    val movie: LiveData<movieForSave> = _movieForSave
 
+    fun fetchMovie(movieId: Int, apiKey: String) {
+        // API çağrısı burada yapılacak
+        viewModelScope.launch {
+
+            val response = MovieAPI.RetrofitClient.api.getMovie(movieId, apiKey)
+            if (response.isSuccessful) {
+                _movieForSave.postValue(response.body())
+
+            } else {
+                // Hata yönetimi
+            }
+
+        }
+    }
+    private val _showForSave = MutableLiveData<showForSave>()
+    val show: LiveData<showForSave> = _showForSave
+
+    fun fetchTvShow(showId: Int, apiKey: String) {
+        // API çağrısı burada yapılacak
+        viewModelScope.launch {
+
+            val response = MovieAPI.RetrofitClient.api.getTvShow(showId, apiKey)
+            if (response.isSuccessful) {
+                _showForSave.postValue(response.body())
+
+            } else {
+                // Hata yönetimi
+            }
+
+        }
+    }
+    fun resetsaved(){
+
+    }
     private val _tvShowDetail = MutableLiveData<TVShowDetail>()
     val tvShowDetail: LiveData<TVShowDetail> = _tvShowDetail
 
@@ -322,6 +404,69 @@ class MovieViewModel : ViewModel() {
                 }
             } catch (e: Exception) {
                 println("Hata: ${e.message}")
+            }
+        }
+    }
+
+
+
+
+    // Film veya TV şovunun kayıtlı olup olmadığını kontrol etme
+    fun checkIfItemIsSaved(itemId: Int, type: String, callback: (Boolean) -> Unit) {
+        val collection = when (type) {
+            "movie" -> "movies"
+            "tvShow" -> "tvShows"
+            else -> throw IllegalArgumentException("Invalid type")
+        }
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        FirebaseFirestore.getInstance()
+            .collection("users").document(currentUserId)
+            .collection(collection)
+            .document(itemId.toString())
+            .get()
+            .addOnSuccessListener { document ->
+                callback(document.exists())
+            }
+            .addOnFailureListener { e ->
+                println("item yok")
+                Log.w("Firestore", "Error checking item", e)
+                callback(false)
+            }
+    }
+
+    // Film veya TV şovunu kaydetme veya çıkarma
+    fun toggleSaveItem(item: Any, type: String) {
+        println("fonksiyona girdi")
+        when (type) {
+            "movie" -> {
+                if (item is movieForSave) {
+                    println("item is movie")
+                    item.id?.let {
+                        checkIfItemIsSaved(it, type) { isSaved ->
+                            println("kayıt kontrol")
+                            if (isSaved) {
+                                println("kayıtlı")
+                                repository.removeMovie( item.id)
+                            } else {
+                                println("kayıt olmalı")
+                                repository.saveMovie(item)
+                            }
+                        }
+                    }
+                }
+            }
+            "tvShow" -> {
+                if (item is showForSave) {
+                    item.id?.let {
+                        checkIfItemIsSaved(it, type) { isSaved ->
+                            if (isSaved) {
+                                repository.removeTvShow( item.id)
+                            } else {
+                                repository.saveTvShow( item)
+                            }
+                        }
+                    }
+                }
             }
         }
     }

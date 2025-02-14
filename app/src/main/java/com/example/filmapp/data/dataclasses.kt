@@ -25,6 +25,26 @@ data class Movie(
 
 ) : MediaItem
 
+
+data class movieForSave(
+    val id: Int?,
+    val title: String?,
+    val poster_path: String?
+){
+    // Parametresiz constructor Firebase için gereklidir
+    constructor() : this(null, null, null)
+}
+
+data class showForSave(
+    val id: Int?,
+    val name: String?,
+    val poster_path: String?
+){
+    // Parametresiz constructor Firebase için gereklidir
+    constructor() : this(null, null, null)
+}
+
+
 data class TVShowResponse(
     var results: List<TVShow>
 )

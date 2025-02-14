@@ -1,4 +1,4 @@
-package com.example.filmapp.movies
+package com.example.filmapp.view
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

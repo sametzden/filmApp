@@ -1,4 +1,4 @@
-package com.example.filmapp.movies
+package com.example.filmapp.view
 
 
 import androidx.compose.animation.core.LinearEasing
@@ -28,6 +28,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -42,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -51,7 +51,6 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -61,16 +60,22 @@ import com.example.filmapp.data.CastMember
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.TVShow
 import com.example.filmapp.models.MovieViewModel
-import com.google.firebase.Firebase
 
 
 @Composable
 fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
     val movieDetail by movieViewModel.movieDetail.observeAsState()
+    val movieForSave by movieViewModel.movie.observeAsState()
     val cast by movieViewModel.cast
+    var isSaved by remember { mutableStateOf(false) }
+
     LaunchedEffect(movieId) {
         movieViewModel.fetchMovieDetail(movieId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.fetchMovieCredits(movieId,"6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.fetchMovie(movieId,"6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.checkIfItemIsSaved(movieId, "movie") { saved ->
+            isSaved = saved
+        }
     }
 
     movieDetail?.let { movie ->
@@ -102,7 +107,13 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold, color = Color.White
                     )
-
+                    // Kaydetme/Çıkarma butonu
+                    Button(onClick = {
+                        movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
+                        isSaved = !isSaved
+                    }) {
+                        Text(if (isSaved) "Kaydedildi" else "Kaydet")
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Süre: ${movie.runtime} dakika", color = Color.White)
                     Text(
@@ -144,6 +155,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
         }
     }
 }
+
 @Composable
 fun ActorItem(actor: CastMember, navController: NavController) {
     Column(modifier = Modifier
@@ -170,39 +182,20 @@ fun GenreChip(genre: String) {
         Text(text = genre, color = Color.White, fontSize = 14.sp)
     }
 }
-/*
-@Composable
-fun CastChip(cast: Cast) {
-    Box(
-        modifier = Modifier
-            .background(Color.Black)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-    ) {
-        Column {
-            cast.profile_path?.let {
-                AsyncImage(
-                    model = "https://image.tmdb.org/t/p/w500${it}",
-                    contentDescription = null,
-                    modifier = Modifier.size(80.dp)
-                )
-            }
 
-            Spacer(Modifier.padding(5.dp))
-            cast.name?.let { Text(text = it, color = Color.White, fontSize = 14.sp) }
-            cast.character?.let { Text(text = it, color = Color.White, fontSize = 14.sp) }
-        }
-
-    }
-}
-*/
 @Composable
 fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
     val tvShowDetail by movieViewModel.tvShowDetail.observeAsState()
     val cast by movieViewModel.showCast
-
+    val showForSave by movieViewModel.show.observeAsState()
+    var isSaved by remember { mutableStateOf(false) }
     LaunchedEffect(tvShowId) {
         movieViewModel.fetchTVShowDetails(tvShowId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.fetchShowCredits(tvShowId,"6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.fetchTvShow(tvShowId,"6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.checkIfItemIsSaved(tvShowId, "tvShow") { saved ->
+            isSaved = saved
+        }
     }
 
     tvShowDetail?.let { tvShow ->
@@ -238,7 +231,13 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
-
+                    // Kaydetme/Çıkarma butonu
+                    Button(onClick = {
+                        showForSave?.let { movieViewModel.toggleSaveItem(it, "tvShow") }
+                        isSaved = !isSaved
+                    }) {
+                        Text(if (isSaved) "Kaydedildi" else "Kaydet")
+                    }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Sezon Sayısı: ${tvShow.number_of_seasons}", color = Color.White)
                     Text(
@@ -246,7 +245,7 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                         color = Color.White
                     )
                     Text(
-                        text = "Puan: ${tvShow.vote_average} (${tvShow.vote_count} oy)",
+                        text = ": ${tvShow.vote_average} (${tvShow.vote_count} oy)",
                         color = Color.White
                     )
                     Text(text = "Durum: ${tvShow.status}", color = Color.White)
@@ -377,49 +376,6 @@ fun ActorShowList(actorTvShows : List<TVShow>,navController: NavController){
                     navController = navController,
                 )
             }
-        }
-    }
-}
-@Composable
-fun ShimmerEffect() {
-    val shimmerColors = listOf(
-        Color.LightGray.copy(alpha = 0.6f),
-        Color.LightGray.copy(alpha = 0.2f),
-        Color.LightGray.copy(alpha = 0.6f)
-    )
-
-    val transition = rememberInfiniteTransition()
-    val translateAnim = transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1000f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(
-                durationMillis = 1000,
-                easing = LinearEasing
-            ),
-            repeatMode = RepeatMode.Reverse
-        )
-    )
-
-    val brush = Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset(translateAnim.value, translateAnim.value),
-        end = Offset(translateAnim.value + 500f, translateAnim.value + 500f)
-    )
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        repeat(5) {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .background(brush = brush)
-                    .padding(vertical = 8.dp)
-            )
         }
     }
 }
