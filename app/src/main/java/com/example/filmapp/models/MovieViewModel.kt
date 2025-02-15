@@ -231,9 +231,6 @@ class MovieViewModel: ViewModel() {
 
         }
     }
-    fun resetsaved(){
-
-    }
     private val _tvShowDetail = MutableLiveData<TVShowDetail>()
     val tvShowDetail: LiveData<TVShowDetail> = _tvShowDetail
 
@@ -327,7 +324,6 @@ class MovieViewModel: ViewModel() {
     fun selectTvCategory(category: MovieCategory) {
         _selectedCategory.value = category
         currentPage = 1
-
         loadMoreTvShows()
     }
 

@@ -112,7 +112,19 @@ data class Actor(
     @SerializedName("profile_path")val profilePath: String?
 )
 
+data class DiscoverMovieResponse(
+    val page: Int,
+    val results: List<MovieDetailForDiscover>,
+    val total_pages: Int,
+    val total_results: Int
+)
 
+data class DiscoverTvResponse(
+    val page: Int,
+    val results: List<TvShowDetailForDiscover>,
+    val total_pages: Int,
+    val total_results: Int
+)
 data class CreditsResponse(
     val cast: List<CastMember>
 )
@@ -142,6 +154,26 @@ data class KnownFor(
 )
 data class PeopleResponse(
     val results: List<Person>
+)
+data class MovieDetailForDiscover(
+    val id: Int,
+    val title: String,
+    val poster_path: String?, // API'den gelen poster_path
+    val genre_ids: List<Int>, // API'den gelen genre_ids
+    val overview: String,
+    val release_date: String,
+    val vote_average: Double,
+    val vote_count: Int
+)
+data class TvShowDetailForDiscover(
+    val id: Int,
+    val name: String,
+    val poster_path: String?,
+    val genre_ids: List<Int>,
+    val overview: String,
+    val first_air_date: String,
+    val vote_average: Double,
+    val vote_count: Int
 )
 
 

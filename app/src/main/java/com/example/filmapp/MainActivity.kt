@@ -16,6 +16,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,9 +29,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.filmapp.data.movieForSave
 import com.example.filmapp.data.repository.FirestoreRepository
+import com.example.filmapp.data.repository.MovieRepository
 import com.example.filmapp.data.showForSave
 
 import com.example.filmapp.models.BottomNavBar
+import com.example.filmapp.models.DiscoverViewModel
+import com.example.filmapp.models.DiscoverViewModelFactory
+
 import com.example.filmapp.view.HomeScreen
 import com.example.filmapp.models.MovieCategory
 import com.example.filmapp.view.MovieDetailScreen
@@ -50,6 +55,7 @@ import com.example.filmapp.presentation.sign_in.ProfileScreen
 import com.example.filmapp.presentation.sign_in.SignInScreen
 
 import com.example.filmapp.ui.theme.FilmAppTheme
+import com.example.filmapp.view.DiscoverScreen
 import com.example.filmapp.view.SavedScreen
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
@@ -58,6 +64,9 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private val viewModel1: MovieViewModel by viewModels()
+    private lateinit var discoverViewModel: DiscoverViewModel
+
+
     private val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
@@ -68,6 +77,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         println(googleAuthUiClient.getSignedInUser()?.username)
         println("oncreate")
+        val repository = MovieRepository()
+        val factory = DiscoverViewModelFactory(repository)
+        discoverViewModel = ViewModelProvider(this, factory).get(DiscoverViewModel::class.java)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
@@ -158,8 +170,10 @@ class MainActivity : ComponentActivity() {
                             HomeScreen(navController = navController, viewModel = viewModel1)
                         }
                         composable("saved"){
-
                             SavedScreen(navController = navController , viewModel = viewModel1)
+                        }
+                        composable("explore"){
+                            DiscoverScreen(viewModel = discoverViewModel,navController)
                         }
                         composable("movieDetail/{movieId}") { backStackEntry ->
                             val movieId =

@@ -135,7 +135,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                         color = Color.White
                     )
                     Row {
-                        movie.genres?.forEach { genre ->
+                        movie.genres.forEach { genre ->
                             GenreChip(genre.name)
                         }
                     }

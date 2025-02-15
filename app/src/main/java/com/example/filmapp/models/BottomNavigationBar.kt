@@ -6,6 +6,7 @@ import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.BookmarkBorder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,7 +24,7 @@ import androidx.navigation.NavController
 fun BottomNavBar(navController: NavController) {
     val items = listOf(
         BottomNavItem("Ana Sayfa", Icons.Filled.Home, "homeScreen"),
-        //BottomNavItem("Keşfet", Icons.Filled.Search, "explore"),
+        BottomNavItem("Keşfet", Icons.Filled.Search, "explore"),
         BottomNavItem("Kaydedildi",Icons.Outlined.BookmarkBorder,"saved"),
         BottomNavItem("Profil", Icons.Filled.Person, "profile")
     )
