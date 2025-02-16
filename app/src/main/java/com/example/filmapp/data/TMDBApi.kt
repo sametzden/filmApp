@@ -153,17 +153,19 @@ interface TMDBApi {
         @Query("api_key") apiKey: String,
         @Query("with_genres") genres: Int?,
        @Query("vote_average.gte") minRating: Float?,
-        //@Query("sort_by") sortBy: String = "popularity.desc",
-        @Query("primary_release_year") year: Int?
+        @Query("sort_by") sortBy: String = "popularity.desc",
+       // @Query("primary_release_year") year: Int?,
+        @Query("language") language: String = "tr-TR",
     ): DiscoverMovieResponse
 
     @GET("discover/tv")
     suspend fun discoverTvShows(
         @Query("api_key") apiKey: String,
-        @Query("with_genres") genres: Int?,
+       @Query("with_genres") genres: Int?,
         @Query("vote_average.gte") minRating: Float?,
         @Query("sort_by") sortBy: String = "popularity.desc",
-        @Query("first_air_date_year") year: Int?
+        //@Query("first_air_date_year") year: Int?,
+        @Query("language") language: String = "tr-TR",
     ): DiscoverTvResponse
 
 

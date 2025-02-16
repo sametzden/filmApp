@@ -20,18 +20,49 @@ class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
     private val _tvShows = MutableLiveData<List<TvShowDetailForDiscover>>()
     val tvShows: LiveData<List<TvShowDetailForDiscover>> = _tvShows
 
-    fun fetchFilteredMovies(genres: Int?, minRating: Float?, year: Int?) {
+    fun fetchFilteredMovies(genres: Int?, minRating: Float?) {
         viewModelScope.launch {
             println("fetchFilteredMovies çalıştı")
-            val movieList = repository.discoverMovies(genres, minRating, year)
+            val movieList = repository.discoverMovies(genres, minRating)
             _movies.value = movieList
             println("Filmler: ${movieList.size}")
         }
     }
+    private val _moodMovie = MutableLiveData<List<MovieDetailForDiscover>>()
+    val moodMovie: LiveData<List<MovieDetailForDiscover>> = _moodMovie
 
-    fun fetchFilteredTvShows(genres: Int?, minRating: Float?, year: Int?) {
+    private val _moodTvShow = MutableLiveData<List<TvShowDetailForDiscover>>()
+    val moodTvShows: LiveData<List<TvShowDetailForDiscover>> = _moodTvShow
+
+    fun fetchByMood(mood: String,selectedTab :Int) {
+        val genreId = when (mood) {
+            "Mutlu" -> 35   // Komedi
+            "Üzgün" -> 18   // Drama
+            "Heyecanlı" -> 28  // Aksiyon
+            "Romantik" -> 10749  // Romantik
+            "Korkmuş" -> 27  // Korku
+            "Motivasyona İhtiyacım Var" -> 99  // Belgesel
+            else -> 18
+        }
+        if (selectedTab==0)
+        {
+            viewModelScope.launch {
+                val response = repository.discoverMovies(genreId,null)
+                _moodMovie.postValue(listOf(response.shuffled().get(1)))
+            }
+        }else
+        {   viewModelScope.launch {
+                val response = repository.discoverTvShows(genreId,null)
+                _moodTvShow.postValue(listOf(response.shuffled().get(1)))
+            }
+
+        }
+
+    }
+
+    fun fetchFilteredTvShows(genres: Int?, minRating: Float?) {
         viewModelScope.launch {
-            val tvShowList = repository.discoverTvShows(genres, minRating, year)
+            val tvShowList = repository.discoverTvShows(genres, minRating)
             _tvShows.value = tvShowList
         }
     }

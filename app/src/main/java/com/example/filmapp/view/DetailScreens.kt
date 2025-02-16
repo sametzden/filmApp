@@ -1,6 +1,7 @@
 package com.example.filmapp.view
 
 
+import android.webkit.WebView
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -51,6 +52,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -149,11 +151,27 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                         }
                     }
 
+                    Button(onClick = { navController.navigate("videoPlayer/${movie.videoKey}") }) {
+                        Text("Fragmanı İzle")
+                    }
+
 
                 }
             }
         }
     }
+}
+@Composable
+fun VideoPlayerScreen(videoUrl: String) {
+    AndroidView(
+        factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                settings.domStorageEnabled = true
+                loadUrl(videoUrl)
+            }
+        }
+    )
 }
 
 @Composable

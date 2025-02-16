@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,9 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Slider
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 
@@ -53,6 +58,7 @@ import com.example.filmapp.data.TVShowDetail
 import com.example.filmapp.data.TvShowDetailForDiscover
 import com.example.filmapp.data.repository.MovieRepository
 import com.example.filmapp.models.DiscoverViewModel
+import com.example.filmapp.models.MovieViewModel
 
 val movieGenres = mapOf(
     "Action" to 28,
@@ -75,12 +81,31 @@ val movieGenres = mapOf(
     "War" to 10752,
     "Western" to 37
 )
-
+val showGenres = mapOf(
+    "Animation" to 16,
+    "Comedy" to 35,
+    "Crime" to 80,
+    "Documentary" to 99,
+    "Drama" to 18,
+    "Family" to 10751,
+    "Kids" to 10762,
+    "Mystery" to 9648,
+    "News" to 10763,
+    "Reality" to 10764,
+    "Science Fiction" to 878,
+    "Soap" to 10766,
+    "Talk" to 10767,
+    "War & Politics" to 10768,
+    "Western" to 37
+)
 @Composable
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: NavController) {
     val movies by viewModel.movies.observeAsState()
     val tvShows by viewModel.tvShows.observeAsState()
 
+    val tabs = listOf("Movies", "TV Shows")
+    val tabs2 = listOf("Tür Seç","Ruh Halini Seç")
+    var selectedTab2 by remember { mutableStateOf(0) }
     var selectedTab by remember { mutableStateOf(0) }
     var selectedGenre by remember { mutableStateOf(1) }
     var minRating by remember { mutableStateOf(0f) }
@@ -91,83 +116,146 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
     ) {
 
         // 📌 TabRow: Movies - TV Shows geçişi
-        TabRow(selectedTabIndex = selectedTab) {
-            Tab(
-                selected = selectedTab == 0,
-                onClick = { selectedTab = 0 }
-            ) { Text("Movies") }
-
-            Tab(
-                selected = selectedTab == 1,
-                onClick = { selectedTab = 1 }
-            ) { Text("TV Shows") }
-        }
-
-        // 📌 Filtreleme UI
-        Column(Modifier.padding(16.dp)) {
-            GenreDropdownMenu(
-                selectedGenre = selectedGenre,
-                onGenreSelected = { genre ->
-                    selectedGenre = genre
-                    if (selectedTab == 0) {
-                        viewModel.fetchFilteredMovies(genre,minRating,selectedYear)
-                    } else {
-                        viewModel.fetchFilteredTvShows(genre, minRating, selectedYear)
-                    }
+        TabRow(
+            selectedTabIndex = selectedTab,
+            Modifier.background(color = Color.Black),
+            containerColor = Color.Black
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
+                    Text(title, color = Color.White)
                 }
-
-            )
-
-
-            // Puan filtresi
-            Text("Min Rating: ${minRating.toInt()}", color = Color.White)
-            Slider(
-                value = minRating,
-                onValueChange = { rating ->
-                    minRating = rating
-                    if (selectedTab == 0) viewModel.fetchFilteredMovies(selectedGenre, rating, selectedYear)
-                    else viewModel.fetchFilteredTvShows(selectedGenre, rating, selectedYear)
-                },
-                valueRange = 0f..10f
-            )
-
-            TextField(
-                value = selectedYear.toString(),
-                onValueChange = { year ->
-                    if (year.all { it.isDigit() }) {
-                        selectedYear = year.toIntOrNull() ?: 0
-                        // Filtreleme işlemi
+            }
+        }
+        Spacer(Modifier.padding(16.dp))
+        TabRow(
+            selectedTabIndex = selectedTab2,
+            Modifier.background(color = Color.Black),
+            containerColor = Color.Black
+        ) {
+            tabs2.forEachIndexed { index, title ->
+                Tab(selected = selectedTab2 == index, onClick = { selectedTab2 = index }) {
+                    Text(title, color = Color.White)
+                }
+            }
+        }
+        if (selectedTab2 == 0){
+            // 📌 Filtreleme UI
+            Column(Modifier.padding(16.dp).background(color = Color.Black)) {
+                GenreDropdownMenu(
+                    selectedGenre = selectedGenre,
+                    onGenreSelected = { genre ->
+                        selectedGenre = genre
                         if (selectedTab == 0) {
-                            viewModel.fetchFilteredMovies(selectedGenre, minRating, selectedYear)
+                            viewModel.fetchFilteredMovies(genre,minRating)
                         } else {
-                            viewModel.fetchFilteredTvShows(selectedGenre, minRating, selectedYear)
+                            viewModel.fetchFilteredTvShows(genre, minRating)
                         }
-                    }
-                },
-                label = { Text("Year", color = Color.Black) },  // Etiket rengini beyaz yapıyoruz
-                textStyle = TextStyle(color = Color.White),
-                modifier = Modifier
-                    .background(Color.Black, shape = RoundedCornerShape(16.dp))
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                singleLine = true, // Tek satırda tutma
-                isError = false // Hata durumu yok
-            )
+                    },
+                    selectedTab =selectedTab
 
+                )
+
+
+                // Puan filtresi
+                Text("Min Rating: ${minRating.toInt()}", color = Color.White)
+                Slider(
+                    value = minRating,
+                    onValueChange = { rating ->
+                        minRating = rating
+                        if (selectedTab == 0) viewModel.fetchFilteredMovies(selectedGenre, rating)
+                        else viewModel.fetchFilteredTvShows(selectedGenre, rating)
+                    },
+                    valueRange = 0f..10f
+                )
+
+
+
+            }
+
+            if (selectedTab == 0) {
+                movies?.let { MovieList(it, navController) }
+            } else {
+                tvShows?.let { TVShowList(it, navController) }
+            }
+
+        }else {
+            MoodSelectionScreen(viewModel,selectedTab,navController)
         }
 
-        if (selectedTab == 0) {
-            movies?.let { MovieList(it, navController) }
-        } else {
-            tvShows?.let { TVShowList(it, navController) }
-        }
+
+
+
 
     }
 }
 @Composable
+fun MoodSelectionScreen(viewModel: DiscoverViewModel,selectedTab: Int,navController: NavController) {
+    val moodsForMovies = listOf("Mutlu", "Üzgün", "Heyecanlı", "Romantik", "Korkmuş", "Motivasyona İhtiyacım Var")
+    val moodsForShows = listOf("Mutlu", "Üzgün",  "Motivasyona İhtiyacım Var")
+    var selectedMood by remember { mutableStateOf(moodsForMovies[0]) }
+    val moodMovies by viewModel.moodMovie.observeAsState()
+    val moodTVShow by viewModel.moodTvShows.observeAsState()
+    Column(modifier = Modifier.padding(16.dp).height(450.dp)) {
+        Text("Ruh Halini Seç", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+        if (selectedTab == 0) {
+            MoodDropdownMenu(selectedMood, onMoodSelected = { mood ->
+                selectedMood = mood
+                viewModel.fetchByMood(mood,selectedTab) // Mood'a göre filmleri getir
+            }, moods = moodsForMovies)
+        }else{
+            MoodDropdownMenu(selectedMood, onMoodSelected = { mood ->
+                selectedMood = mood
+                viewModel.fetchByMood(mood,selectedTab) // Mood'a göre filmleri getir
+            }, moods = moodsForShows)
+        }
+
+
+        // Seçilen ruh haline göre film listesi göster
+        if (selectedTab == 0) {
+            moodMovies?.let { MovieList(it, navController) }
+        } else {
+            moodTVShow?.let { TVShowList(it, navController) }
+        }
+    }
+}
+@Composable
+fun MoodDropdownMenu(
+    selectedMood: String,
+    onMoodSelected: (String) -> Unit,
+    moods: List<String>
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        Button(onClick = { expanded = true }) {
+            Text(text = selectedMood.ifEmpty { "Ruh Hali Seç" })
+        }
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            moods.forEach { mood ->
+                DropdownMenuItem(
+                    text = { Text(mood) }, // Güncel versiyon
+                    onClick = {
+                        onMoodSelected(mood)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
+
+@Composable
 fun GenreDropdownMenu(
     selectedGenre: Int,
     onGenreSelected: (Int) -> Unit,
+    selectedTab : Int
 
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -183,16 +271,31 @@ fun GenreDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            movieGenres.entries.forEach { entry  ->
-                DropdownMenuItem(
-                    text = { Text( text = entry.key)}, // Film türünü yazdırıyoruz
-                    onClick = {
-                        onGenreSelected(entry.value)
-                       // Seçilen türü geri döndür
-                        expanded = false // Menüyü kapat
-                    }
-                )
+            if (selectedTab == 0){
+                movieGenres.entries.forEach { entry  ->
+                    DropdownMenuItem(
+                        text = { Text( text = entry.key, color = Color.White)}, // Film türünü yazdırıyoruz
+                        onClick = {
+                            onGenreSelected(entry.value)
+                            // Seçilen türü geri döndür
+                            expanded = false // Menüyü kapat
+                        }, modifier = Modifier.background(color = Color.Black)
+                    )
+                }
+            }else
+            {
+                showGenres.entries.forEach { entry  ->
+                    DropdownMenuItem(
+                        text = { Text( text = entry.key, color = Color.White)}, // Film türünü yazdırıyoruz
+                        onClick = {
+                            onGenreSelected(entry.value)
+                            // Seçilen türü geri döndür
+                            expanded = false // Menüyü kapat
+                        }, modifier = Modifier.background(color = Color.Black)
+                    )
+                }
             }
+
         }
     }
 }
@@ -287,7 +390,7 @@ fun TvShowDetailItem(tvShow: TvShowDetailForDiscover, navController: NavControll
             .width(150.dp)
             .clickable {
                 // Tıklanan film detaylarına yönlendiriyoruz
-                navController.navigate("movieDetail/${tvShow.id}")
+                navController.navigate("tvShowDetail/${tvShow.id}")
             }
     ) {
         Image(

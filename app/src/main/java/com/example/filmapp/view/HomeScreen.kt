@@ -61,13 +61,14 @@ import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.Person
 import com.example.filmapp.data.TVShow
+import com.example.filmapp.models.DiscoverViewModel
 import com.example.filmapp.models.MovieViewModel
 import com.example.filmapp.models.SearchViewModel
 import com.google.firebase.auth.FirebaseAuth
 
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: MovieViewModel) {
+fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverViewModel : DiscoverViewModel) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
     val searchViewModel = SearchViewModel()

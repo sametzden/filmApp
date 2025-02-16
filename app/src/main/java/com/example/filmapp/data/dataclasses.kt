@@ -77,8 +77,8 @@ data class MovieDetail(
     val runtime: Int?,  // Film süresi (dakika cinsinden)
     val vote_average: Double?, // Puan ortalaması
     val vote_count: Int?, // Puan veren kişi sayısı
-    val genres: List<Genre>
-
+    val genres: List<Genre>,
+    val videoKey: String?
 )
 
 data class Genre(
@@ -101,7 +101,8 @@ data class TVShowDetail(
     val number_of_episodes: Int?,
     val episode_run_time: List<Int>?,  // Dakika cinsinden bölüm süresi
     val genres: List<Genre>?,
-    val status: String?
+    val status: String?,
+    val videoKey : String?
 )
 data class Actor(
     val id: Int,

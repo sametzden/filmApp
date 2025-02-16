@@ -15,18 +15,22 @@ import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.BlendMode.Companion.Screen
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 
 
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.filmapp.data.movieForSave
 import com.example.filmapp.data.repository.FirestoreRepository
 import com.example.filmapp.data.repository.MovieRepository
@@ -57,6 +61,7 @@ import com.example.filmapp.presentation.sign_in.SignInScreen
 import com.example.filmapp.ui.theme.FilmAppTheme
 import com.example.filmapp.view.DiscoverScreen
 import com.example.filmapp.view.SavedScreen
+import com.example.filmapp.view.VideoPlayerScreen
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -65,6 +70,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val viewModel1: MovieViewModel by viewModels()
     private lateinit var discoverViewModel: DiscoverViewModel
+
 
 
     private val googleAuthUiClient by lazy {
@@ -87,9 +93,14 @@ class MainActivity : ComponentActivity() {
             FilmAppTheme {
 
                 val navController = rememberNavController()
-
+                val bottomBarScreens = listOf("homeScreen", "explore", "saved", "profile")
+                val currentBackStackEntry = navController.currentBackStackEntryAsState().value
+                val currentRoute = currentBackStackEntry?.destination?.route
                 Scaffold(
-                    bottomBar = { BottomNavBar(navController) }
+                    bottomBar = {if (currentRoute in bottomBarScreens) {
+                        BottomNavBar(navController)
+                    }
+                    }
                 ) {innerPadding->
                     // NavHost ile yönlendirme yapılacak
                     NavHost(navController = navController, startDestination = "sign_in", modifier = Modifier.padding(innerPadding)) {
@@ -167,13 +178,20 @@ class MainActivity : ComponentActivity() {
 
                         }
                         composable("homeScreen") {
-                            HomeScreen(navController = navController, viewModel = viewModel1)
+                            HomeScreen(navController = navController, viewModel = viewModel1 , discoverViewModel =discoverViewModel)
                         }
                         composable("saved"){
                             SavedScreen(navController = navController , viewModel = viewModel1)
                         }
                         composable("explore"){
                             DiscoverScreen(viewModel = discoverViewModel,navController)
+                        }
+                        composable(
+                            route = "videoPlayer/{movie.videoKey}"
+                            arguments = listOf(navArgument("videoKey") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val videoKey = backStackEntry.arguments?.getString("videoKey") ?: ""
+                            VideoPlayerScreen(videoKey, navController)
                         }
                         composable("movieDetail/{movieId}") { backStackEntry ->
                             val movieId =
