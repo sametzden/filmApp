@@ -183,6 +183,8 @@ class MovieViewModel: ViewModel() {
     private val _movieDetail = MutableLiveData<MovieDetail>()
     val movieDetail: LiveData<MovieDetail> = _movieDetail
 
+    private val _movieVideoKey = MutableLiveData<String?>()
+    val movieVideoKey: LiveData<String?> = _movieVideoKey
     fun fetchMovieDetail(movieId: Int, apiKey: String) {
         // API çağrısı burada yapılacak
         viewModelScope.launch {
@@ -195,6 +197,16 @@ class MovieViewModel: ViewModel() {
                 // Hata yönetimi
             }
 
+        }
+    }
+    fun fetchMovieVideos(movieId: Int,apiKey: String) {
+        viewModelScope.launch {
+            val response = MovieAPI.RetrofitClient.api.getMovieVideos(movieId, apiKey)
+            if (response.isSuccessful) {
+                val videos = response.body()?.results ?: emptyList()
+                val trailer = videos.find { it.site == "YouTube" && it.type == "Trailer" }
+                _movieVideoKey.postValue(trailer?.key) // Eğer fragman varsa key’i al
+            }
         }
     }
     private val _movieForSave = MutableLiveData<movieForSave>()

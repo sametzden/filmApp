@@ -3,6 +3,7 @@ package com.example.filmapp.view
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +23,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.Slider
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 
@@ -30,7 +32,7 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
+
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -41,24 +43,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.text.TextStyle
+
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.filmapp.data.Movie
-import com.example.filmapp.data.MovieDetail
+
 import com.example.filmapp.data.MovieDetailForDiscover
-import com.example.filmapp.data.TVShow
-import com.example.filmapp.data.TVShowDetail
+
 import com.example.filmapp.data.TvShowDetailForDiscover
-import com.example.filmapp.data.repository.MovieRepository
+
 import com.example.filmapp.models.DiscoverViewModel
-import com.example.filmapp.models.MovieViewModel
+
 
 val movieGenres = mapOf(
     "Action" to 28,
@@ -102,15 +102,14 @@ val showGenres = mapOf(
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: NavController) {
     val movies by viewModel.movies.observeAsState()
     val tvShows by viewModel.tvShows.observeAsState()
-
     val tabs = listOf("Movies", "TV Shows")
-    val tabs2 = listOf("Tür Seç","Ruh Halini Seç")
+    val tabs2 = listOf("Tür Seç", "Ruh Halini Seç")
     var selectedTab2 by remember { mutableStateOf(0) }
     var selectedTab by remember { mutableStateOf(0) }
-    var selectedGenre by remember { mutableStateOf(1) }
+    var selectedGenre: Int? by remember { mutableStateOf(null) }
     var minRating by remember { mutableStateOf(0f) }
     var selectedYear by remember { mutableStateOf(0) }
-
+    var showMovieList: Boolean by remember { mutableStateOf(false) }
     Column(
         Modifier.background(color = Color.Black).fillMaxSize()
     ) {
@@ -139,54 +138,102 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                 }
             }
         }
-        if (selectedTab2 == 0){
+
+        if (selectedTab2 == 0) {
             // 📌 Filtreleme UI
-            Column(Modifier.padding(16.dp).background(color = Color.Black)) {
-                GenreDropdownMenu(
-                    selectedGenre = selectedGenre,
-                    onGenreSelected = { genre ->
-                        selectedGenre = genre
-                        if (selectedTab == 0) {
-                            viewModel.fetchFilteredMovies(genre,minRating)
-                        } else {
-                            viewModel.fetchFilteredTvShows(genre, minRating)
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(350.dp)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val genreEntries = if (selectedTab == 0) movieGenres.entries.toList() else showGenres.entries.toList() // Listeye dönüştür
+                items(genreEntries) { entry ->
+                    GenreCard(
+                        genre = entry.key, // Tür adı (String)
+                        genreId = entry.value, // Tür ID'si (Int)
+                        isSelected = selectedGenre == entry.value,
+                        onGenreClick = { clickedGenreId ->
+                            selectedGenre = if (selectedGenre == clickedGenreId) null else clickedGenreId // Türü seç veya iptal et
+                            showMovieList = selectedGenre != null
+                            if (selectedGenre != null) {
+                                filterItems(viewModel, selectedTab, selectedGenre!!, minRating) // Verileri çek
+                            }
                         }
-                    },
-                    selectedTab =selectedTab
-
-                )
-
-
-                // Puan filtresi
-                Text("Min Rating: ${minRating.toInt()}", color = Color.White)
-                Slider(
-                    value = minRating,
-                    onValueChange = { rating ->
-                        minRating = rating
-                        if (selectedTab == 0) viewModel.fetchFilteredMovies(selectedGenre, rating)
-                        else viewModel.fetchFilteredTvShows(selectedGenre, rating)
-                    },
-                    valueRange = 0f..10f
-                )
-
-
-
+                    )
+                }
             }
 
-            if (selectedTab == 0) {
-                movies?.let { MovieList(it, navController) }
-            } else {
-                tvShows?.let { TVShowList(it, navController) }
-            }
+
+            // Puan filtresi
+            Text("Min Rating: ${minRating.toInt()}", color = Color.White)
+            Slider(
+                value = minRating,
+                onValueChange = { rating ->
+                    minRating = rating
+                    if (selectedTab == 0) viewModel.fetchFilteredMovies(selectedGenre, rating)
+                    else viewModel.fetchFilteredTvShows(selectedGenre, rating)
+                },
+                valueRange = 0f..10f
+            )
+
 
         }else {
-            MoodSelectionScreen(viewModel,selectedTab,navController)
+            MoodSelectionScreen(viewModel, selectedTab, navController)
         }
 
+        if (showMovieList) { // Film listesi gösteriliyorsa
+            if (selectedTab == 0) {
+                movies?.let { MovieList(it, navController) } // Tüm ekranı kaplayacak
+            } else {
+                tvShows?.let { TVShowList(it, navController) } // Tüm ekranı kaplayacak
+            }
+        }
+
+    }
 
 
 
+}
 
+
+
+@Composable
+fun GenreCard(genre: String, genreId: Int, isSelected: Boolean, onGenreClick: (Int) -> Unit) {
+    Card(
+        modifier = Modifier
+            .clickable { onGenreClick(genreId) }
+            .padding(4.dp)
+            .width(150.dp)
+            .height(80.dp),
+        colors = CardColors(
+            containerColor = if (isSelected) Color.Blue else Color.Gray,
+            contentColor = Color.White,
+            disabledContainerColor =  Color.Transparent,
+            disabledContentColor = Color.Transparent
+        ) ,
+        // Seçili/Seçilmemiş renk
+        shape = RoundedCornerShape(8.dp)
+    ) {
+        Text(
+            text = genre, // Tür adını göster
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(8.dp)
+                .fillMaxWidth()
+        )
+    }
+}
+
+private fun filterItems(viewModel: DiscoverViewModel, selectedTab: Int, selectedGenre: Int, minRating: Float) {
+    if (selectedTab == 0) {
+        viewModel.fetchFilteredMovies((selectedGenre), minRating) // Tek bir tür ID ile filtreleme
+    } else {
+        viewModel.fetchFilteredTvShows((selectedGenre), minRating) // Tek bir tür ID ile filtreleme
     }
 }
 @Composable
@@ -415,8 +462,6 @@ fun TvShowDetailItem(tvShow: TvShowDetailForDiscover, navController: NavControll
             color = Color.White
 
         )
-
-
     }
 }
 

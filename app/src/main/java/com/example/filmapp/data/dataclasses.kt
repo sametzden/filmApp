@@ -176,5 +176,18 @@ data class TvShowDetailForDiscover(
     val vote_average: Double,
     val vote_count: Int
 )
+data class VideoResponse(
+    val results: List<Video>
+)
+
+data class Video(
+    val id: String,
+    val key: String,  // YouTube video ID
+    val name: String,
+    val site: String,
+    val type: String
+)
+
+
 
 

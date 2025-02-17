@@ -1,7 +1,11 @@
 package com.example.filmapp.view
 
 
+import android.annotation.SuppressLint
+import android.webkit.PermissionRequest
+import android.webkit.WebChromeClient
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -11,9 +15,11 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,19 +27,31 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -41,6 +59,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
@@ -50,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -65,7 +85,7 @@ import com.example.filmapp.models.MovieViewModel
 
 
 @Composable
-fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
+fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel(), navController: NavController) {
     val movieDetail by movieViewModel.movieDetail.observeAsState()
     val movieForSave by movieViewModel.movie.observeAsState()
     val cast by movieViewModel.cast
@@ -73,119 +93,129 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
 
     LaunchedEffect(movieId) {
         movieViewModel.fetchMovieDetail(movieId, "6d8b9e531b047e3bdd803b9979082c51")
-        movieViewModel.fetchMovieCredits(movieId,"6d8b9e531b047e3bdd803b9979082c51")
-        movieViewModel.fetchMovie(movieId,"6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.fetchMovieCredits(movieId, "6d8b9e531b047e3bdd803b9979082c51")
+        movieViewModel.fetchMovie(movieId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.checkIfItemIsSaved(movieId, "movie") { saved ->
             isSaved = saved
         }
     }
 
     movieDetail?.let { movie ->
-        LazyColumn(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .background(color = colorResource(R.color.black))
-                        .fillMaxSize()
-                ) {
-                    Image(
-                        painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.backdrop_path}"),
-                        contentDescription = movie.title,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(300.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .alpha(0.5f)
-                    )
+            // Arka plan resmi (tam ekran)
+            Image(
+                painter = rememberImagePainter("https://image.tmdb.org/t/p/original${movie.backdrop_path}"), // Orijinal boyut
+                contentDescription = movie.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop,
+                alpha = 0.4f // Şeffaflık ayarı
+            )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+            // İçerik (kaydırılabilir)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                item {
+                    Column(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        // Poster resmi
+                        Image(
+                            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
+                            contentDescription = movie.title,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(300.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Fit
+                        )
 
-                    Text(
-                        text = movie.title,
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold, color = Color.White
-                    )
-                    // Kaydetme/Çıkarma butonu
-                    Button(onClick = {
-                        movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
-                        isSaved = !isSaved
-                    }) {
-                        Text(if (isSaved) "Kaydedildi" else "Kaydet")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(text = "Süre: ${movie.runtime} dakika", color = Color.White)
-                    Text(
-                        text = "Puan: ${movie.vote_average} (${movie.vote_count} oy)",
-                        color = Color.White
-                    )
-                    Text(text = "Yayın Tarihi: ${movie.release_date}", color = Color.White)
-                    Text(
-                        text = movie.overview,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = "Release Date: ${movie.release_date}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(bottom = 16.dp),
-                        color = Color.White
-                    )
-                    Row {
-                        movie.genres.forEach { genre ->
-                            GenreChip(genre.name)
+                        // Başlık ve detaylar
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = movie.title,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+                            // Kaydetme butonu
+                            Button(
+                                onClick = {
+                                    movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
+                                    isSaved = !isSaved
+                                },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Gray.copy(alpha = 0.5f)
+                                )
+                            ) {
+                                Text(if (isSaved) "Kaydedildi" else "Kaydet", color = Color.White)
+                            }
                         }
-                    }
-                    Column {
-                        Text("Oyuncular", fontSize = 22.sp, color = Color.White)
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Diğer bilgiler
+                        InfoRow("Süre", "${movie.runtime} dakika")
+                        InfoRow("Puan", String.format("%.1f", movie.vote_average))
+                        InfoRow("Yayın Tarihi", movie.release_date)
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Özet
+                        Text(
+                            text = movie.overview,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.LightGray,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Türler
+                        Row(modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                            movie.genres.forEach { genre ->
+                                GenreChip(genre.name)
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Oyuncular
+                        Text("Oyuncular", fontSize = 20.sp, color = Color.White)
                         LazyRow {
                             items(cast) { actor ->
-                                println(actor.profilePath)
                                 ActorItem(actor, navController)
                             }
                         }
                     }
-
-                    Button(onClick = { navController.navigate("videoPlayer/${movie.videoKey}") }) {
-                        Text("Fragmanı İzle")
-                    }
-
-
                 }
             }
         }
     }
 }
-@Composable
-fun VideoPlayerScreen(videoUrl: String) {
-    AndroidView(
-        factory = { context ->
-            WebView(context).apply {
-                settings.javaScriptEnabled = true
-                settings.domStorageEnabled = true
-                loadUrl(videoUrl)
-            }
-        }
-    )
-}
+
+// ... (Diğer composable'lar aynı kalır)
 
 @Composable
-fun ActorItem(actor: CastMember, navController: NavController) {
-    Column(modifier = Modifier
-        .padding(8.dp)
-        .clickable { navController.navigate("actorDetail/${actor.id}") }
-    ) {
-        Image(
-            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${actor.profilePath}"),
-            contentDescription = actor.name,
-            modifier = Modifier.size(80.dp)
-        )
-        Text(actor.name, color = Color.White, fontSize = 14.sp)
+fun InfoRow(label: String, value: String) {
+    Row {
+        Text(label, color = Color.LightGray, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(value, color = Color.LightGray)
     }
 }
 
@@ -193,13 +223,36 @@ fun ActorItem(actor: CastMember, navController: NavController) {
 fun GenreChip(genre: String) {
     Box(
         modifier = Modifier
-            .background(Color.Black)
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .background(Color.DarkGray)
+            .padding(8.dp)
+            .clip(RoundedCornerShape(8.dp))
     ) {
-
-        Text(text = genre, color = Color.White, fontSize = 14.sp)
+        Text(genre, color = Color.White)
     }
 }
+
+@Composable
+fun ActorItem(actor: CastMember, navController: NavController) {
+    Column(
+        modifier = Modifier
+            .padding(8.dp)
+            .width(100.dp) // Sabit genişlik
+            .clickable { navController.navigate("actorDetail/${actor.id}") },
+        horizontalAlignment = Alignment.CenterHorizontally // Ortala hizala
+    ) {
+        Image(
+            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${actor.profilePath}"),
+            contentDescription = actor.name,
+            modifier = Modifier
+                .size(80.dp)
+                .clip(CircleShape), // Yuvarlak resim
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(actor.name, color = Color.LightGray, fontSize = 14.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+    }
+}
+
 
 @Composable
 fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
@@ -307,92 +360,111 @@ fun ActorDetailScreen(actorId: Int, navController: NavController) {
     val actorTVShows by viewModel.actorTVShows
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
+
     LaunchedEffect(actorId) {
         viewModel.fetchActorDetails(actorId)
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(color = Color.Black)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(color = Color.Black)
+            .padding(16.dp) // Padding eklendi
+    ) {
         actorDetails?.let { actorData ->
-            Image(
-                painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${actorData.profilePath}"),
-                contentDescription = actorData.name,
-                modifier = Modifier
-                    .size(150.dp)
-                    .clip(CircleShape)
-            )
-            Text(actorData.name, fontSize = 22.sp, color = Color.White)
-            Text("Doğum Tarihi: ${actorData.birthday ?: "Bilinmiyor"}", color = Color.White)
-
-
-            Spacer(Modifier.height(16.dp))
-            // Sekmeler (Movies - TV Shows)
-            TabRow(
-                selectedTabIndex = selectedTab,
-                Modifier.background(color = Color.Black),
-                containerColor = Color.Black
+            Row( // Oyuncunun resmi ve bilgileri yan yana
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
-                        Text(title, color = Color.White)
+                Image(
+                    painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${actorData.profilePath}"),
+                    contentDescription = actorData.name,
+                    modifier = Modifier
+                        .size(100.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(Modifier.width(16.dp)) // Boşluk eklendi
+                Column {
+                    Text(actorData.name, fontSize = 22.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text("Doğum Tarihi: ${actorData.birthday ?: "Bilinmiyor"}", color = Color.White)
+                    //Yer ve ölüm tarihi eklendi
+                    if (actorData.placeOfBirth != null) {
+                        Text("Doğum Yeri: ${actorData.placeOfBirth}", color = Color.White)
                     }
+
                 }
             }
 
+
+            Spacer(Modifier.height(16.dp))
+
+            // Sekmeler (Movies - TV Shows)
+            TabRow(
+                selectedTabIndex = selectedTab,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(color = Color.Black),
+                containerColor = Color.Black,
+                indicator = { tabPositions ->
+                    TabRowDefaults.Indicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                        color = Color.Cyan // Indicator rengi değiştirildi
+                    )
+                }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        text = {
+                            Text(
+                                title,
+                                color = if (selectedTab == index) Color.Cyan else Color.White
+                            )
+                        }
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+
             // Seçili Sekmeye Göre İçerik
             if (selectedTab == 0) {
-                ActorMovieList(actorMovies,navController)
+                ActorMovieList(actorMovies, navController)
             } else {
                 ActorShowList(actorTVShows, navController)
             }
-
         }
     }
 }
+
 @Composable
-fun ActorMovieList(actorMovies : List<Movie>,navController: NavController){
-    Text("Oynadığı Filmler", fontSize = 20.sp, color = Color.White)
-    actorMovies.forEach(){
-            movie->
-        println(movie.name)
-    }
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
+fun ActorMovieList(actorMovies: List<Movie>, navController: NavController) {
+    if (actorMovies.isEmpty()) {
+        Text("Bu oyuncunun oynadığı film bulunmamaktadır.", color = Color.White)
+    } else {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+            columns = GridCells.Adaptive(minSize = 150.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             items(actorMovies) { movie ->
-                println(movie.name)
-                MovieItem(
-                    movie = movie,
-                    navController = navController,
-                )
+                MovieItem(movie = movie, navController = navController) // navController geçirildi
             }
         }
     }
 }
 
-
 @Composable
-fun ActorShowList(actorTvShows : List<TVShow>,navController: NavController){
-    Text("Oynadığı Diziler", fontSize = 20.sp, color = Color.White)
+fun ActorShowList(actorTvShows: List<TVShow>, navController: NavController) {
+    if (actorTvShows.isEmpty()) {
+        Text("Bu oyuncunun oynadığı dizi bulunmamaktadır.", color = Color.White)
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
+    } else {
         LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+            columns = GridCells.Adaptive(minSize = 150.dp),
             modifier = Modifier.fillMaxSize()
         ) {
             items(actorTvShows) { show ->
-
-                TVShowItem(
-                    tvShow = show,
-                    navController = navController,
-                )
+                TVShowItem(tvShow = show, navController = navController) // navController geçirildi
             }
         }
     }

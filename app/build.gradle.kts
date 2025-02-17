@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.firebase.firestore)
+    releaseImplementation(libs.play.services)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,17 +64,22 @@ dependencies {
     implementation (libs.androidx.lifecycle.runtime.compose)
     implementation (libs.firebase.auth.ktx)
     implementation (libs.play.services.auth)
+
     implementation(libs.androidx.material.icons.extended)
     implementation (libs.androidx.lifecycle.viewmodel.compose)
     implementation (libs.androidx.navigation.compose) // Navigation Compose
     // Retrofit, Gson, Moshi
     implementation (libs.retrofit)
     implementation (libs.converter.gson)
+    implementation (libs.androidyoutubeplayer.core)
 
     // OkHttp (Retrofit için)
     implementation (libs.okhttp)
 
     // Coil - Görselleri yüklemek için
     implementation (libs.coil.compose)
+
+
+
 
 }

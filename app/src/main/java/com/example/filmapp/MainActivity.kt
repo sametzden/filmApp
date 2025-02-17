@@ -61,7 +61,7 @@ import com.example.filmapp.presentation.sign_in.SignInScreen
 import com.example.filmapp.ui.theme.FilmAppTheme
 import com.example.filmapp.view.DiscoverScreen
 import com.example.filmapp.view.SavedScreen
-import com.example.filmapp.view.VideoPlayerScreen
+
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.delay
@@ -186,13 +186,7 @@ class MainActivity : ComponentActivity() {
                         composable("explore"){
                             DiscoverScreen(viewModel = discoverViewModel,navController)
                         }
-                        composable(
-                            route = "videoPlayer/{movie.videoKey}"
-                            arguments = listOf(navArgument("videoKey") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val videoKey = backStackEntry.arguments?.getString("videoKey") ?: ""
-                            VideoPlayerScreen(videoKey, navController)
-                        }
+
                         composable("movieDetail/{movieId}") { backStackEntry ->
                             val movieId =
                                 backStackEntry.arguments?.getString("movieId")?.toInt() ?: 1

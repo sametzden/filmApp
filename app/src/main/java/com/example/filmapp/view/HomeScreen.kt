@@ -1,5 +1,7 @@
 package com.example.filmapp.view
 
+import android.annotation.SuppressLint
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -7,8 +9,10 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,9 +25,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Tv
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,9 +42,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldColors
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,6 +65,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -65,6 +83,7 @@ import com.example.filmapp.models.DiscoverViewModel
 import com.example.filmapp.models.MovieViewModel
 import com.example.filmapp.models.SearchViewModel
 import com.google.firebase.auth.FirebaseAuth
+import kotlin.math.sin
 
 
 @Composable
@@ -75,7 +94,9 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
     var isSearchActive by remember { mutableStateOf(false) } // Arama açık mı kontrolü
     var currentUser =FirebaseAuth.getInstance().currentUser
    println(currentUser?.displayName.toString() + "homescreen cagırıldı")
-    Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
         Column(modifier = Modifier.fillMaxSize()) {
             // Üst Kısım (Başlık + Arama Çubuğu)
 
@@ -96,7 +117,9 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                         imageVector = Icons.Default.Person,
                         contentDescription = "Profile",
                         tint = Color.White,
-                        modifier = Modifier.size(30.dp).padding(top = 3.dp)
+                        modifier = Modifier
+                            .size(30.dp)
+                            .padding(top = 3.dp)
                     )
                 }
 
@@ -115,13 +138,36 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                 // Sekmeler (Movies - TV Shows)
                 TabRow(
                     selectedTabIndex = selectedTab,
-                    Modifier.background(color = Color.Black),
-                    containerColor = Color.Black
+                    modifier = Modifier.background(color = Color.Black),
+                    containerColor = Color.Black,
+                    indicator = { tabPositions ->
+                        TabRowDefaults.Indicator(
+                            modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                            height = 2.dp,
+                            color = Color.White // İndicator rengi
+                        )
+                    }
                 ) {
                     tabs.forEachIndexed { index, title ->
-                        Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
-                            Text(title, color = Color.White)
-                        }
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        imageVector = if (index == 0) Icons.Default.Movie else Icons.Default.Tv,
+                                        contentDescription = title,
+                                        tint = if (selectedTab == index) Color.White else Color.Gray
+                                    )
+                                    Text(
+                                        text = title,
+                                        color = if (selectedTab == index) Color.White else Color.Gray,
+                                        fontWeight = if (selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                        modifier = Modifier.animateContentSize()
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
 
@@ -139,6 +185,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSearchActiveChange: (Boolean) -> Unit) {
     var query by remember { mutableStateOf("") }
@@ -155,19 +202,51 @@ fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSea
     val results by viewModel.searchResults
 
     Box {
-        TextField(
-            value = query,
-            onValueChange = { query = it },
-            placeholder = { Text("Search Movies & TV Shows") },
+        Row(
             modifier = Modifier
+                .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .onFocusChanged { focusState ->
-                    if (!focusState.isFocused) {
-                        isDropdownVisible = false
-                        onSearchActiveChange(false) // **Odak kaybolunca HomeScreen içeriğini geri getir**
-                    }
-                }
-        )
+                .height(50.dp)
+                .background(color = Color(0x20ffffff), shape = RoundedCornerShape(50.dp))
+                .padding(horizontal = 50.dp),
+                verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = null,
+                tint = Color.White,
+                modifier = Modifier
+                    .size(30.dp)
+                    .padding(top = 3.dp)
+            )
+            Spacer(Modifier.width(10.dp))
+            TextField(
+                value = query,
+                onValueChange = { query = it },
+                placeholder = { Text("Search Movies & TV Shows", color = Color(0xffbdbdbd) )},
+                colors =TextFieldDefaults.textFieldColors(
+                    cursorColor = Color.White,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedPlaceholderColor = Color.White,
+                    focusedTextColor = Color.White,
+                    containerColor = Color.Transparent,
+                    unfocusedTextColor = Color.White
+                ),
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .onFocusChanged { focusState ->
+                        if (!focusState.isFocused) {
+                            isDropdownVisible = false
+                            onSearchActiveChange(false) // **Odak kaybolunca HomeScreen içeriğini geri getir**
+                        }
+                    },
+                textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
+                shape = RoundedCornerShape(50.dp),
+                singleLine = true
+            )
+        }
 
         if (isDropdownVisible && results.isNotEmpty()) {
             Box(
@@ -204,8 +283,8 @@ fun SearchResultItem(item: MediaItem, navController: NavController) {
                     navController.navigate("movieDetail/${item.id}")
                 } else if (item is TVShow) {
                     navController.navigate("tvShowDetail/${item.id}")
-                }else if (item is Person){
-                    navController.navigate ("actorDetail/${item.id}")
+                } else if (item is Person) {
+                    navController.navigate("actorDetail/${item.id}")
                 }
             }
             .padding(16.dp)
@@ -257,11 +336,15 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
     var selectedTab by remember { mutableStateOf(0) }
     val movieTabs = listOf("Popular", "Up Coming", "Top Rated", "Now Playing")
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
         // TabRow ekleniyor
         TabRow(
             selectedTabIndex = selectedTab,
-            modifier = Modifier.fillMaxWidth().background(color = Color.Black),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.Black),
             containerColor = Color.Black,
             contentColor = Color.Black
         ) {
@@ -419,11 +502,15 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
     var selectedTab1 by remember { mutableStateOf(0) }
     val showTabs = listOf("Popular", "Top Rated", "Now Playing")
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(Color.Black)) {
         // TabRow ekleniyor
         TabRow(
             selectedTabIndex = selectedTab1,
-            modifier = Modifier.fillMaxWidth().background(color = Color.Black),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.Black),
             containerColor = Color.Black,
             contentColor = Color.Black
         ) {
@@ -538,47 +625,70 @@ fun NowPlayingShowSection(
 }
 
 
+
 @Composable
 fun MovieItem(movie: Movie, navController: NavController) {
-    // Yatay listede her öğe için bir Row oluşturuyoruz
-    Column(
+    Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(150.dp)
+            .width(150.dp) // Sabit genişlik
             .clickable {
-                // Tıklanan film detaylarına yönlendiriyoruz
                 navController.navigate("movieDetail/${movie.id}")
-            }// Poster genişliğini sabit tutuyoruz
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(12.dp)
     ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().background(Color.Black)
+        ) {
+            Image(
+                painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
+                contentDescription = movie.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp), // Sabit yükseklik
+                contentScale = ContentScale.Crop
+            )
 
-        // Filmin posterini gösteriyoruz
-        Image(
+            Column(
+                modifier = Modifier
+                    .padding(8.dp)
+            ) {
+                // Film adını ölçüyoruz
+                var titleHeight by remember { mutableStateOf(0) }
+                val titleTextStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
 
-            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
-            contentDescription = movie.title,
-            modifier = Modifier
-                .height(250.dp)  // Poster yüksekliği
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))  // Yuvarlatılmış köşeler
-                .shadow(8.dp, shape = RoundedCornerShape(12.dp))  // Hafif gölge efekti
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-            // Filmin adı
-            movie.title?.let {
                 Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                    modifier = Modifier.padding(horizontal = 4.dp),
-                    color = Color.White
+                    text = movie.title ?: "",
+                    style = titleTextStyle,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                        titleHeight = coordinates.size.height
+                    }
 
                 )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "Rating",
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.Yellow // İkon rengini sarı yapar
+                    )
+                    Text(
+                        text = String.format("%.1f", movie.vote_average), // Virgülden sonra 1 basamak
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White
+                    )
+                }
+
+
             }
-
-
+        }
     }
 }
 

@@ -24,6 +24,12 @@ interface TMDBApi {
         @Query("api_key") apiKey: String,
         @Query("language") language: String = "tr-TR"
     ): Response<MovieDetail>
+    @GET("movie/{movie_id}/videos")
+    suspend fun getMovieVideos(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): Response<VideoResponse>
+
     @GET("movie/{movie_id}")
     suspend fun getMovie(
         @Path("movie_id") movieId: Int,
