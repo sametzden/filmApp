@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -20,18 +21,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.filmapp.models.MovieViewModel
+import com.example.filmapp.view.WatchedScreen
 
 
 @Composable
 fun ProfileScreen(
+    viewModel: MovieViewModel,
+    navController : NavController,
     userData: UserData?,
     onSignOut: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().background(color = Color.Black),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = Color.Black),
     ) {
         if(userData?.profilePictureUrl != null) {
             AsyncImage(
@@ -56,6 +63,13 @@ fun ProfileScreen(
         Button(onClick = onSignOut) {
             Text(text = "Sign out")
         }
+        Spacer(Modifier.height(16.dp))
+        Text(text= "İzlediklerim", color = Color.White )
+
+        Column {
+            WatchedScreen(viewModel,navController)
+        }
 
     }
+
 }

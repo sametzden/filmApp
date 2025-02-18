@@ -62,6 +62,7 @@ class MovieViewModel: ViewModel() {
 
     private val _savedMovies = MutableLiveData<List<movieForSave>>()
     private val _savedTvShows = MutableLiveData<List<showForSave>>()
+    private val _watchedMovies = MutableLiveData<List<movieForSave>>()
     init {
         // Firebase'den güncel kullanıcıyı al
         _userId.value = FirebaseAuth.getInstance().currentUser?.uid
@@ -85,13 +86,16 @@ class MovieViewModel: ViewModel() {
             println("saved movies calıstı")
             _savedMovies.postValue(movie)
         }
-
         // Kaydedilen TV şovlarını dinle
         repository.getSavedTvShows { tvShows ->
             _savedTvShows.postValue(tvShows)
         }
     }
-
+    fun watchedItems(){
+        repository.getWatchedMovies { movie->
+            _watchedMovies.postValue(movie)
+        }
+    }
     override fun onCleared() {
         super.onCleared()
         auth.removeAuthStateListener(authStateListener)
@@ -102,6 +106,7 @@ class MovieViewModel: ViewModel() {
     }
     // Kaydedilen filmler
     val savedMovies: LiveData<List<movieForSave>> get() = _savedMovies
+    val watchedMovies: LiveData<List<movieForSave>> get() = _watchedMovies
     // Kaydedilen TV şovları
     val savedTvShows: LiveData<List<showForSave>> get() = _savedTvShows
     @RequiresApi(Build.VERSION_CODES.O)
@@ -416,8 +421,49 @@ class MovieViewModel: ViewModel() {
         }
     }
 
-
-
+    fun toggleWatchedItem(item: Any, type: String) {
+        println("fonksiyona girdi")
+        when (type) {
+            "movie" -> {
+                if (item is movieForSave) {
+                    println("item is movie")
+                    item.id?.let {
+                        checkIfItemIsWatched(it, type) { isWatched ->
+                            println("kayıt kontrol")
+                            if (isWatched) {
+                                println("kayıtlı")
+                                repository.removeWatchedMovie(item.id)
+                            } else {
+                                println("kayıt olmalı")
+                                repository.saveWatchedMovie(item)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    fun checkIfItemIsWatched(itemId: Int, type: String, callback: (Boolean) -> Unit) {
+        val collection = when (type) {
+            "movie" -> "watchedMovies"
+            "tvShow" -> "tvShows"
+            else -> throw IllegalArgumentException("Invalid type")
+        }
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        FirebaseFirestore.getInstance()
+            .collection("users").document(currentUserId)
+            .collection(collection)
+            .document(itemId.toString())
+            .get()
+            .addOnSuccessListener { document ->
+                callback(document.exists())
+            }
+            .addOnFailureListener { e ->
+                println("item yok")
+                Log.w("Firestore", "Error checking item", e)
+                callback(false)
+            }
+    }
 
     // Film veya TV şovunun kayıtlı olup olmadığını kontrol etme
     fun checkIfItemIsSaved(itemId: Int, type: String, callback: (Boolean) -> Unit) {

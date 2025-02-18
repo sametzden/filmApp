@@ -61,6 +61,7 @@ import com.example.filmapp.presentation.sign_in.SignInScreen
 import com.example.filmapp.ui.theme.FilmAppTheme
 import com.example.filmapp.view.DiscoverScreen
 import com.example.filmapp.view.SavedScreen
+import com.example.filmapp.view.WatchedScreen
 
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
@@ -156,7 +157,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(route = "profile") {
-                            ProfileScreen(userData = googleAuthUiClient.getSignedInUser(),
+                            ProfileScreen(viewModel1,navController,userData = googleAuthUiClient.getSignedInUser(),
                                 onSignOut = {
                                     lifecycleScope.launch {
                                         googleAuthUiClient.signOut()
@@ -182,6 +183,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("saved"){
                             SavedScreen(navController = navController , viewModel = viewModel1)
+                        }
+                        composable("watched"){
+                            WatchedScreen(viewModel1,navController)
                         }
                         composable("explore"){
                             DiscoverScreen(viewModel = discoverViewModel,navController)

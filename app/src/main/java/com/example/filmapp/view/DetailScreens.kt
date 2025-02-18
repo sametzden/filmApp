@@ -39,6 +39,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -90,13 +92,17 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
     val movieForSave by movieViewModel.movie.observeAsState()
     val cast by movieViewModel.cast
     var isSaved by remember { mutableStateOf(false) }
-
+    var isWatched by remember { mutableStateOf(false) }
     LaunchedEffect(movieId) {
         movieViewModel.fetchMovieDetail(movieId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.fetchMovieCredits(movieId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.fetchMovie(movieId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.checkIfItemIsSaved(movieId, "movie") { saved ->
             isSaved = saved
+        }
+        movieViewModel.checkIfItemIsWatched(movieId,"movie") { watched->
+            isWatched = watched
+
         }
     }
 
@@ -152,21 +158,33 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                             Spacer(modifier = Modifier.width(16.dp))
 
                             // Kaydetme butonu
-                            Button(
-                                onClick = {
-                                    movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
-                                    isSaved = !isSaved
-                                },
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = Color.Gray.copy(alpha = 0.5f)
+                            IconButton(onClick = {
+                                movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
+                                isSaved = !isSaved
+                            }) {
+                                Icon(
+                                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                    contentDescription = if (isSaved) "Kaydedildi" else "Kaydet",
+                                    tint = Color.White // İkon rengini beyaz yap
                                 )
-                            ) {
-                                Text(if (isSaved) "Kaydedildi" else "Kaydet", color = Color.White)
                             }
+
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = {
+                                movieForSave?.let { movieViewModel.toggleWatchedItem(it, "movie") }
+                                isWatched = !isWatched
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Gray.copy(alpha = 0.5f)
+                            )
+                        ) {
 
+                            Text(if (isWatched) "İzledim" else "İzlemedim", color = Color.White)
+
+                        }
                         // Diğer bilgiler
                         InfoRow("Süre", "${movie.runtime} dakika")
                         InfoRow("Puan", String.format("%.1f", movie.vote_average))
@@ -260,6 +278,8 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
     val cast by movieViewModel.showCast
     val showForSave by movieViewModel.show.observeAsState()
     var isSaved by remember { mutableStateOf(false) }
+
+
     LaunchedEffect(tvShowId) {
         movieViewModel.fetchTVShowDetails(tvShowId, "6d8b9e531b047e3bdd803b9979082c51")
         movieViewModel.fetchShowCredits(tvShowId,"6d8b9e531b047e3bdd803b9979082c51")
@@ -267,6 +287,7 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
         movieViewModel.checkIfItemIsSaved(tvShowId, "tvShow") { saved ->
             isSaved = saved
         }
+
     }
 
     tvShowDetail?.let { tvShow ->
@@ -302,12 +323,15 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
-                    // Kaydetme/Çıkarma butonu
-                    Button(onClick = {
+                    IconButton(onClick = {
                         showForSave?.let { movieViewModel.toggleSaveItem(it, "tvShow") }
                         isSaved = !isSaved
                     }) {
-                        Text(if (isSaved) "Kaydedildi" else "Kaydet")
+                        Icon(
+                            imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                            contentDescription = if (isSaved) "Kaydedildi" else "Kaydet",
+                            tint = Color.White // İkon rengini beyaz yap
+                        )
                     }
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(text = "Sezon Sayısı: ${tvShow.number_of_seasons}", color = Color.White)
