@@ -56,6 +56,7 @@ fun ProfileScreen(
                 text = userData.username,
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
+                color = Color.White,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(16.dp))

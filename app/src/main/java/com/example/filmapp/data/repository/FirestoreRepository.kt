@@ -12,9 +12,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 
 class FirestoreRepository {
-
-
-
     // Film kaydetme
     fun saveMovie(movie: movieForSave) {
         val db = FirebaseFirestore.getInstance()
@@ -104,12 +101,10 @@ class FirestoreRepository {
                     callback(movies)
                 }
         }
-
     }
     fun saveWatchedMovie(movie: movieForSave) {
         val db = FirebaseFirestore.getInstance()
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
-        println("watched save movie calıstı "+ userId)
         db.collection("users").document(userId.toString())
             .collection("watchedMovies")
             .document(movie.id.toString())
@@ -130,6 +125,52 @@ class FirestoreRepository {
                 Log.w("Firestore", "Error removing movie", e)
             }
     }
+    fun getWatchedTvShows( callback: (List<showForSave>) -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        val db = FirebaseFirestore.getInstance()
+        if (userId != null){
+            db.collection("users").document(userId)
+                .collection("watchedTvShows")
+                .addSnapshotListener { snapshot, e ->
+                    if (e != null) {
+                        println("watched tvshow yok")
+                        Log.w("Firestore", "Listen failed.", e)
+                        return@addSnapshotListener
+                    }
+                    val shows = snapshot?.toObjects(showForSave::class.java) ?: emptyList()
+                    callback(shows)
+                }
+        }
+    }
+
+    fun saveWatchedTvShows(tvShow: showForSave) {
+        println("save watched shows a girdi")
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        db.collection("users").document(userId.toString())
+            .collection("watchedTvShows")
+            .document(tvShow.id.toString())
+            .set(tvShow)
+            .addOnFailureListener { e ->
+                println("tvshow watched olmadı")
+                Log.w("Firestore", "Error saving movie", e)
+            }
+    }
+
+    fun removeWatchedTvShows( tvShowId: Int) {
+        val db = FirebaseFirestore.getInstance()
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+        db.collection("users").document(userId)
+            .collection("watchedTvShows")
+            .document(tvShowId.toString())
+            .delete()
+            .addOnFailureListener { e ->
+                Log.w("Firestore", "Error removing movie", e)
+            }
+    }
+
+
+
     // Kaydedilen TV şovlarını dinleme
     fun getSavedTvShows( callback: (List<showForSave>) -> Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""

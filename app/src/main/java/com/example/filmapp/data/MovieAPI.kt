@@ -12,17 +12,7 @@ class MovieAPI {
         private val retrofit: Retrofit = Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
-            .client(
-                OkHttpClient.Builder()
-                    .addInterceptor { chain ->
-                        val request = chain.request().newBuilder()
-                            .addHeader("Authorization", "Bearer $API_KEY")
-                            .build()
-                        chain.proceed(request)
-                    }
-                    .build()
-            )
-            .build()
+            .build() // OkHttpClient kaldırıldı, gereksiz
 
         val api: TMDBApi = retrofit.create(TMDBApi::class.java)
     }

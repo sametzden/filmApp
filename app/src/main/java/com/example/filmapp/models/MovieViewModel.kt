@@ -63,6 +63,7 @@ class MovieViewModel: ViewModel() {
     private val _savedMovies = MutableLiveData<List<movieForSave>>()
     private val _savedTvShows = MutableLiveData<List<showForSave>>()
     private val _watchedMovies = MutableLiveData<List<movieForSave>>()
+    private val _watchedTvShows =MutableLiveData<List<showForSave>>()
     init {
         // Firebase'den güncel kullanıcıyı al
         _userId.value = FirebaseAuth.getInstance().currentUser?.uid
@@ -95,6 +96,9 @@ class MovieViewModel: ViewModel() {
         repository.getWatchedMovies { movie->
             _watchedMovies.postValue(movie)
         }
+        repository.getWatchedTvShows { show ->
+            _watchedTvShows.postValue(show)
+        }
     }
     override fun onCleared() {
         super.onCleared()
@@ -107,6 +111,7 @@ class MovieViewModel: ViewModel() {
     // Kaydedilen filmler
     val savedMovies: LiveData<List<movieForSave>> get() = _savedMovies
     val watchedMovies: LiveData<List<movieForSave>> get() = _watchedMovies
+    val watchedTVShows:LiveData<List<showForSave>> get() = _watchedTvShows
     // Kaydedilen TV şovları
     val savedTvShows: LiveData<List<showForSave>> get() = _savedTvShows
     @RequiresApi(Build.VERSION_CODES.O)
@@ -441,12 +446,25 @@ class MovieViewModel: ViewModel() {
                     }
                 }
             }
+            "tvShow"-> {
+                if (item is showForSave) {
+                    item.id?.let {
+                        checkIfItemIsWatched(it, type) { isSaved ->
+                            if (isSaved) {
+                                repository.removeWatchedTvShows( item.id)
+                            } else {
+                                repository.saveWatchedTvShows( item)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     fun checkIfItemIsWatched(itemId: Int, type: String, callback: (Boolean) -> Unit) {
         val collection = when (type) {
             "movie" -> "watchedMovies"
-            "tvShow" -> "tvShows"
+            "tvShow" -> "watchedTvShows"
             else -> throw IllegalArgumentException("Invalid type")
         }
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: ""

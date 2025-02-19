@@ -1,6 +1,7 @@
 [versions]
 agp = "8.8.0"
 coilCompose = "2.5.0"
+coilTransformations = "2.2.2"
 converterGson = "2.9.0"
 coreVersion = "11.1.0"
 firebaseAuthKtx = "23.2.0"
@@ -29,7 +30,9 @@ androidx-material = { module = "androidx.compose.material:material", version.ref
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 androidyoutubeplayer-core = { module = "com.pierfrancescosoffritti.androidyoutubeplayer:core", version.ref = "coreVersion" }
+coil = { module = "io.coil-kt:coil", version.ref = "coilCompose" }
 coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
+coil-transformations = { module = "io.coil-kt:coil-transformations", version.ref = "coilTransformations" }
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 firebase-auth-ktx = { module = "com.google.firebase:firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
 google-services = { module = "com.google.gms:google-services", version.ref = "googleServices" }

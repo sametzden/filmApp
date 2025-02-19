@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    id("com.google.gms.google-services")
+    id(id = "com.google.gms.google-services")
 }
 
 android {
@@ -52,7 +52,6 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.runtime.livedata)
     implementation(libs.firebase.firestore)
-    releaseImplementation(libs.play.services)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -63,6 +62,7 @@ dependencies {
     implementation(libs.androidx.material)
     implementation (libs.androidx.lifecycle.runtime.compose)
     implementation (libs.firebase.auth.ktx)
+
     implementation (libs.play.services.auth)
 
     implementation(libs.androidx.material.icons.extended)
@@ -77,7 +77,8 @@ dependencies {
     implementation (libs.okhttp)
 
     // Coil - Görselleri yüklemek için
-    implementation (libs.coil.compose)
+    implementation(libs.coil.compose) // Compose için Coil
+
 
 
 

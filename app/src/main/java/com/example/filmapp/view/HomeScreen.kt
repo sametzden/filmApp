@@ -63,6 +63,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -625,112 +626,150 @@ fun NowPlayingShowSection(
 }
 
 
-
 @Composable
 fun MovieItem(movie: Movie, navController: NavController) {
     Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(150.dp) // Sabit genişlik
+            .width(180.dp) // Genişlik arttırıldı
             .clickable {
                 navController.navigate("movieDetail/${movie.id}")
             },
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(16.dp) // Köşe yuvarlama arttırıldı
     ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().background(Color.Black)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp) // Yükseklik arttırıldı
         ) {
             Image(
                 painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
                 contentDescription = movie.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(250.dp), // Sabit yükseklik
+                modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
 
-            Column(
+            // Başlık ve Puan (Resim üzerine entegre)
+            Box(
                 modifier = Modifier
-                    .padding(8.dp)
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient( // Gradyan arka plan
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .padding(16.dp)
             ) {
-                // Film adını ölçüyoruz
-                var titleHeight by remember { mutableStateOf(0) }
-                val titleTextStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold)
-
-                Text(
-                    text = movie.title ?: "",
-                    style = titleTextStyle,
-                    color = Color.White,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.onGloballyPositioned { coordinates ->
-                        titleHeight = coordinates.size.height
-                    }
-
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Star,
-                        contentDescription = "Rating",
-                        modifier = Modifier.size(16.dp),
-                        tint = Color.Yellow // İkon rengini sarı yapar
-                    )
+                Column {
                     Text(
-                        text = String.format("%.1f", movie.vote_average), // Virgülden sonra 1 basamak
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White
+                        text = movie.title ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy( // Başlık boyutu büyütüldü
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Star, // İkon eklendi
+                            contentDescription = "Puan",
+                            tint = Color.Yellow,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = String.format("%.1f", movie.vote_average),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.White
+                        )
+                    }
                 }
-
-
             }
         }
     }
 }
 
-@Composable
-fun TVShowItem(tvShow: TVShow,navController: NavController) {
 
-    Column(
+@Composable
+fun TVShowItem(tvShow: TVShow, navController: NavController) {
+    Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(150.dp)
+            .width(180.dp) // Genişlik arttırıldı
             .clickable {
                 navController.navigate("tvShowDetail/${tvShow.id}")
-            }  // Poster genişliğini sabit tutuyoruz
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp) // Köşe yuvarlama arttırıldı
     ) {
-        // Dizinin posterini gösteriyoruz
-        Image(
-            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${tvShow.poster_path}"),
-            contentDescription = tvShow.name,
+        Box(
             modifier = Modifier
-                .height(250.dp)  // Poster yüksekliği
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))  // Yuvarlatılmış köşeler
-                .shadow(8.dp, shape = RoundedCornerShape(12.dp))  // Hafif gölge efekti
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Dizinin adı
-        tvShow.name?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                modifier = Modifier.padding(horizontal = 4.dp),
-                color = Color.White
+                .height(280.dp) // Yükseklik arttırıldı
+        ) {
+            Image(
+                painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${tvShow.poster_path}"),
+                contentDescription = tvShow.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
-        }
 
+            // Başlık ve Puan (Resim üzerine entegre)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient( // Gradyan arka plan
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = tvShow.name ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy( // Başlık boyutu büyütüldü
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (tvShow.vote_average != null) { // Puan null değilse göster
+                            Icon(
+                                imageVector = Icons.Default.Star, // İkon eklendi
+                                contentDescription = "Puan",
+                                tint = Color.Yellow,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = String.format("%.1f", tvShow.vote_average),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
-
 sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
     object Home : BottomNavItem("homeScreen", Icons.Default.Home, "Home")
     object Profile : BottomNavItem("profile", Icons.Default.Person, "Profile")

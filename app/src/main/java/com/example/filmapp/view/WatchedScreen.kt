@@ -25,7 +25,7 @@ import com.example.filmapp.models.MovieViewModel
 fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
     viewModel.watchedItems()
     val watchedMovies by viewModel.watchedMovies.observeAsState(emptyList())
-
+    val watchedTVShows by viewModel.watchedTVShows.observeAsState(emptyList())
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
 
@@ -51,15 +51,19 @@ fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
                 // Seçili Sekmeye Göre İçerik
                 if (selectedTab == 0) {
                     items(watchedMovies) { movie ->
-
                         MovieItemForSave(movie, navController)
                     }
-                }
+                }else{
+                    items(watchedTVShows) { show ->
+                        TvShowItemForSave(show, navController)
+                    }
                 }
 
             }
 
-
         }
+
+
     }
+}
 
