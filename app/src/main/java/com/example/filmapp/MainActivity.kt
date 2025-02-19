@@ -161,15 +161,15 @@ class MainActivity : ComponentActivity() {
                                 onSignOut = {
                                     lifecycleScope.launch {
                                         googleAuthUiClient.signOut()
-
                                         delay(500)
+                                        navController.navigate("sign_in") {
+                                            popUpTo("profile") { inclusive = true }
+                                        }
+                                        Toast.makeText(applicationContext, "Çıkış yapıldı", Toast.LENGTH_LONG).show()
                                         val currentUser = FirebaseAuth.getInstance().currentUser
                                         if (currentUser == null) {
                                             viewModel1.updateUserId() // Kullanıcı ID'yi sıfırla
-                                            Toast.makeText(applicationContext, "Çıkış yapıldı", Toast.LENGTH_LONG).show()
-                                            navController.navigate("sign_in") {
-                                                popUpTo("profile") { inclusive = true }
-                                            }
+
                                         } else {
                                             Toast.makeText(applicationContext, "Çıkış başarısız!", Toast.LENGTH_LONG).show()
                                         }
@@ -183,9 +183,6 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("saved"){
                             SavedScreen(navController = navController , viewModel = viewModel1)
-                        }
-                        composable("watched"){
-                            WatchedScreen(viewModel1,navController)
                         }
                         composable("explore"){
                             DiscoverScreen(viewModel = discoverViewModel,navController)

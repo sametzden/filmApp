@@ -122,9 +122,8 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
             Image(
                 painter = rememberImagePainter(
                     data = "https://image.tmdb.org/t/p/original${movie.backdrop_path}",
-                    builder = {
 
-                    }
+
                 ),
                 contentDescription = movie.title,
                 modifier = Modifier.fillMaxSize(),
@@ -164,7 +163,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                                 .height(350.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .shadow(8.dp, shape = RoundedCornerShape(16.dp)), // Gölge
-                            contentScale = ContentScale.Fit
+                            contentScale = ContentScale.Crop
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -195,7 +194,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                             ) {
                                 Text(
                                     text = String.format("%.1f", movie.vote_average),
-                                    color = Color.Black
+                                    color = Color.White
                                 )
                             }
                         }
@@ -204,14 +203,16 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
 
                         // Kaydetme ve İzleme Butonları (ikonlu ve animasyonlu)
                         Row {
-                            IconButton(onClick = { /* ... */ }) {
+                            IconButton(onClick = {   movieForSave?.let { movieViewModel.toggleSaveItem(it, "movie") }
+                                isSaved = !isSaved }) {
                                 Icon(
                                     imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
                                     contentDescription = if (isSaved) "Kaydedildi" else "Kaydet",
                                     tint = Color.White
                                 )
                             }
-                            Button(onClick = { /* ... */ }) {
+                            Button(onClick = {  movieForSave?.let { movieViewModel.toggleWatchedItem(it, "movie") }
+                                isWatched = !isWatched }) {
                                 Text(if (isWatched) "İzledim" else "İzlemedim", color = Color.White)
                             }
                         }
@@ -400,10 +401,13 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                         }
                         // Diğer bilgiler
                         InfoRow("Sezon Sayısı:", "${tvShow.number_of_seasons}")
-                        InfoRow("Puan", String.format("%.1f", tvShow.vote_average)+" (${tvShow.vote_count} oy)")
+                        InfoRow("Puan", String.format("%.1f", tvShow.vote_average))
                         InfoRow("Toplam Bölüm Sayısı:", "${tvShow.number_of_episodes}")
 
-
+                        Text(
+                            text = ": ${tvShow.vote_average} (${tvShow.vote_count} oy)",
+                            color = Color.White
+                        )
                         Text(text = "Durum: ${tvShow.status}", color = Color.White)
                         Text(
                             text = tvShow.overview,

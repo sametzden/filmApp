@@ -3,9 +3,11 @@ package com.example.filmapp.view
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
@@ -44,10 +46,7 @@ fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
         }
 
         Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
-                modifier = Modifier.fillMaxSize()
-            ) {
+            LazyRow  {
                 // Seçili Sekmeye Göre İçerik
                 if (selectedTab == 0) {
                     items(watchedMovies) { movie ->

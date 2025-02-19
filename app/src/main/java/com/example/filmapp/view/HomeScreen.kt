@@ -179,9 +179,10 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                 } else {
                     TVShowList(navController, viewModel)
                 }
-
+                WatchedScreen(viewModel,navController)
 
             }
+
         }
     }
 }
@@ -775,80 +776,5 @@ sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: 
     object Profile : BottomNavItem("profile", Icons.Default.Person, "Profile")
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomNavigationBar(navController: NavController) {
-    val items = listOf(
-        BottomNavItem.Home,
-        BottomNavItem.Profile
-    )
-    var isSheetOpen by remember { mutableStateOf(false) }
-    val modalBottomSheetState = rememberModalBottomSheetState()
-    if (isSheetOpen) {
-        ModalBottomSheet(
-            sheetState = modalBottomSheetState,
-            onDismissRequest = { isSheetOpen = false }
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
-            ) {
-                Text("Home", modifier = Modifier.clickable {
-                    navController.navigate("homeScreen")
-                    isSheetOpen = false
-                })
-                Spacer(modifier = Modifier.height(8.dp))
-                Text("Profile", modifier = Modifier.clickable {
-                    navController.navigate("profile")
-                    isSheetOpen = false
-                })
-            }
-        }
-    }
-}
 
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PersistentBottomSheet(navController: NavController) {
-    BottomSheetScaffold(
-        sheetContent = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text("Navigation", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = { navController.navigate("homeScreen") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Home")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Button(
-                    onClick = { navController.navigate("profile") },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Profile")
-                }
-            }
-        },
-        sheetPeekHeight = 100.dp // Alt kısımda sürekli görünür olacak yükseklik
-    ) { paddingValues ->
-        // Ana içeriğin buraya gelecek
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Main Content", fontSize = 24.sp)
-        }
-    }
-}
 

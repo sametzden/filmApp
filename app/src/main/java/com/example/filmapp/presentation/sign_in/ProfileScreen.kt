@@ -67,9 +67,7 @@ fun ProfileScreen(
         Spacer(Modifier.height(16.dp))
         Text(text= "İzlediklerim", color = Color.White )
 
-        Column {
-            WatchedScreen(viewModel,navController)
-        }
+
 
     }
 

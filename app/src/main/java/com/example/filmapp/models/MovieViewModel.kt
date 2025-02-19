@@ -92,6 +92,7 @@ class MovieViewModel: ViewModel() {
             _savedTvShows.postValue(tvShows)
         }
     }
+
     fun watchedItems(){
         repository.getWatchedMovies { movie->
             _watchedMovies.postValue(movie)

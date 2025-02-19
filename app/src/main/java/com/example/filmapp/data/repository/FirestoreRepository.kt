@@ -88,19 +88,17 @@ class FirestoreRepository {
     fun getWatchedMovies( callback: (List<movieForSave>) -> Unit) {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val db = FirebaseFirestore.getInstance()
-        if (userId != null){
-            db.collection("users").document(userId)
-                .collection("watchedMovies")
-                .addSnapshotListener { snapshot, e ->
-                    if (e != null) {
-                        println("watched movie yok")
-                        Log.w("Firestore", "Listen failed.", e)
-                        return@addSnapshotListener
-                    }
-                    val movies = snapshot?.toObjects(movieForSave::class.java) ?: emptyList()
-                    callback(movies)
+        db.collection("users").document(userId)
+            .collection("watchedMovies")
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    println("watched movie yok")
+                    Log.w("Firestore", "Listen failed.", e)
+                    return@addSnapshotListener
                 }
-        }
+                val movies = snapshot?.toObjects(movieForSave::class.java) ?: emptyList()
+                callback(movies)
+            }
     }
     fun saveWatchedMovie(movie: movieForSave) {
         val db = FirebaseFirestore.getInstance()
