@@ -15,14 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.BlendMode.Companion.Screen
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 
 
 import androidx.navigation.compose.NavHost
@@ -30,11 +27,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.example.filmapp.data.movieForSave
-import com.example.filmapp.data.repository.FirestoreRepository
 import com.example.filmapp.data.repository.MovieRepository
-import com.example.filmapp.data.showForSave
 
 import com.example.filmapp.models.BottomNavBar
 import com.example.filmapp.models.DiscoverViewModel
@@ -162,6 +155,7 @@ class MainActivity : ComponentActivity() {
                                     lifecycleScope.launch {
                                         googleAuthUiClient.signOut()
                                         delay(500)
+                                        discoverViewModel.clearData()
                                         navController.navigate("sign_in") {
                                             popUpTo("profile") { inclusive = true }
                                         }
@@ -187,7 +181,7 @@ class MainActivity : ComponentActivity() {
                         composable("explore"){
                             DiscoverScreen(viewModel = discoverViewModel,navController)
                         }
-
+                        composable("watched") { WatchedScreen(viewModel1, navController) }
                         composable("movieDetail/{movieId}") { backStackEntry ->
                             val movieId =
                                 backStackEntry.arguments?.getString("movieId")?.toInt() ?: 1
@@ -223,9 +217,15 @@ class MainActivity : ComponentActivity() {
                                 "popularShows" -> MovieCategory.POPULAR_TVSHOWS
                                 "topRatedShows" -> MovieCategory.TOP_RATED_TVSHOWS
                                 "nowPlayingShows" -> MovieCategory.NOW_PLAYING_TVSHOWS
-                                else -> MovieCategory.POPULAR_MOVIES
+                                else -> null
                             }
-                            SeeAllTVShowsScreen(viewModel1, category, navController)
+                            if (category !=null){
+                                SeeAllTVShowsScreen(viewModel1, category, navController)
+                            }
+                            else {
+                                SeeAllTVShowsScreen(viewModel1,null,navController)
+                            }
+
                         }
                     }
 

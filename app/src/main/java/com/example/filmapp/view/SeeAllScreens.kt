@@ -18,21 +18,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.compose.foundation.lazy.grid.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.DisposableEffect
+import com.example.filmapp.data.movieForSave
 import com.example.filmapp.models.MovieCategory
 import com.example.filmapp.models.MovieViewModel
 
 @Composable
-fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory, navController: NavController) {
+fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory?, navController: NavController) {
 
     val movies = viewModel._movieList
+
     DisposableEffect(Unit) {
         onDispose {
             viewModel._movieList.clear() // Kullanıcı geri döndüğünde listeyi temizle
         }
     }
     LaunchedEffect(category) {
-        viewModel.selectCategory(category) // Seçili kategoriye göre veri çek
+        category?.let { viewModel.selectCategory(it) } // Seçili kategoriye göre veri çek
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
@@ -40,14 +43,15 @@ fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory, navCo
             columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
             modifier = Modifier.fillMaxSize()
         ) {
-            items(movies) { movie ->
-                MovieItem(
-                    movie = movie,
-                    navController = navController,
+            if(category!= null){
+                items(movies) { movie ->
+                    MovieItem(
+                        movie = movie,
+                        navController = navController,
 
-                )
+                        )
+                }
             }
-
             item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
                 Button(
                     onClick = { viewModel.loadMovies() },
@@ -65,7 +69,7 @@ fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory, navCo
 
 
 @Composable
-fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory, navController: NavController) {
+fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory?, navController: NavController) {
     val shows = viewModel._tvShowList
     DisposableEffect(Unit) {
         onDispose {
@@ -73,7 +77,7 @@ fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory, navC
         }
     }
     LaunchedEffect(category) {
-        viewModel.selectTvCategory(category) // Seçili kategoriye göre veri çek
+        category?.let { viewModel.selectTvCategory(it) } // Seçili kategoriye göre veri çek
     }
 
     Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {

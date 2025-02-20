@@ -48,12 +48,12 @@ class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
         {
             viewModelScope.launch {
                 val response = repository.discoverMovies(genreId,null)
-                _moodMovie.postValue(listOf(response.shuffled().get(1)))
+                _movies.value =(listOf(response.shuffled().get(1)))
             }
         }else
         {   viewModelScope.launch {
                 val response = repository.discoverTvShows(genreId,null)
-                _moodTvShow.postValue(listOf(response.shuffled().get(1)))
+                _tvShows.value = (listOf(response.shuffled().get(1)))
             }
 
         }
@@ -66,6 +66,12 @@ class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
             _tvShows.value = tvShowList
         }
     }
+    fun clearData() {
+        _movies.value = emptyList()
+        _tvShows.value = emptyList()
+
+    }
+
 }
 class DiscoverViewModelFactory(private val repository: MovieRepository) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

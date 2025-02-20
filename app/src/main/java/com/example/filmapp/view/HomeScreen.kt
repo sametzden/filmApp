@@ -53,6 +53,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -94,13 +95,10 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
     val searchViewModel = SearchViewModel()
     var isSearchActive by remember { mutableStateOf(false) } // Arama açık mı kontrolü
     var currentUser =FirebaseAuth.getInstance().currentUser
-   println(currentUser?.displayName.toString() + "homescreen cagırıldı")
     Box(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Üst Kısım (Başlık + Arama Çubuğu)
-
             Spacer(Modifier.size(40.dp))
             Row(
                 modifier = Modifier
@@ -179,7 +177,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                 } else {
                     TVShowList(navController, viewModel)
                 }
-                WatchedScreen(viewModel,navController)
+
 
             }
 
@@ -337,39 +335,53 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
     val upcomingMovies = viewModel.upcomingMovies
     var selectedTab by remember { mutableStateOf(0) }
     val movieTabs = listOf("Popular", "Up Coming", "Top Rated", "Now Playing")
+    viewModel.watchedItems()
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
-        // TabRow ekleniyor
-        TabRow(
-            selectedTabIndex = selectedTab,
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = Color.Black),
-            containerColor = Color.Black,
-            contentColor = Color.Black
-        ) {
-            movieTabs.forEachIndexed { index, title ->
-                Tab(
-                    selected = selectedTab == index,
-                    onClick = { selectedTab = index },
-                    text = {
-                        Text(
-                            text = title,
-                            color = if (selectedTab == index) Color.Cyan else Color.White
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        item {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                // TabRow ekleniyor
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(color = Color.Black),
+                    containerColor = Color.Black,
+                    contentColor = Color.Black
+                ) {
+                    movieTabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = {
+                                Text(
+                                    text = title,
+                                    color = if (selectedTab == index) Color.Cyan else Color.White
+                                )
+                            }
                         )
                     }
-                )
-            }
-        }
+                }
 
-        // Seçilen tab'a göre içerik gösterimi
-        when (selectedTab) {
-            0 -> PopularMoviesSection(navController, popularMovies)
-            1 -> UpcomingMoviesSection(navController, upcomingMovies)
-            2 -> TopRatedMoviesSection(navController, topRatedMovies)
-            3 -> NowPlayingMoviesSection(navController, nowPlaying, )
+                // Seçilen tab'a göre içerik gösterimi
+                when (selectedTab) {
+                    0 -> PopularMoviesSection(navController, popularMovies)
+                    1 -> UpcomingMoviesSection(navController, upcomingMovies)
+                    2 -> TopRatedMoviesSection(navController, topRatedMovies)
+                    3 -> NowPlayingMoviesSection(navController, nowPlaying,)
+                }
+
+
+            }
         }
     }
 }
@@ -503,7 +515,8 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
     val nowPlayingTVShows  =viewModel.nowPlayingTVShows
     var selectedTab1 by remember { mutableStateOf(0) }
     val showTabs = listOf("Popular", "Top Rated", "Now Playing")
-
+    viewModel.watchedItems()
+    val watchedTVShows by viewModel.watchedTVShows.observeAsState(emptyList())
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)) {
@@ -534,6 +547,12 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
             0 -> PopularShowSection(navController, popularShows)
             1 -> TopRatedShowSection(navController, topRatedTVShows)
             2 -> NowPlayingShowSection(navController, nowPlayingTVShows )
+        }
+        Spacer(Modifier.height(16.dp))
+        LazyRow {
+            items(watchedTVShows) { show ->
+                TvShowItemForSave(show, navController)
+            }
         }
     }
 
