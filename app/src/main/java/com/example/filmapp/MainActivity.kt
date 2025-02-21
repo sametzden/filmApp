@@ -49,6 +49,7 @@ import com.example.filmapp.view.SeeAllTVShowsScreen
 import com.example.filmapp.view.TVShowDetailScreen
 import com.example.filmapp.presentation.sign_in.GoogleAuthUiClient
 import com.example.filmapp.presentation.sign_in.ProfileScreen
+import com.example.filmapp.presentation.sign_in.RegisterScreen
 import com.example.filmapp.presentation.sign_in.SignInScreen
 
 import com.example.filmapp.ui.theme.FilmAppTheme
@@ -131,7 +132,8 @@ class MainActivity : ComponentActivity() {
                             }
                             SignInScreen(
                                 state = state,
-                                onSignInClick = {
+                                navController = navController,
+                                onSignInWithGoogleClick = {
                                     lifecycleScope.launch {
                                         val signInIntentSender = googleAuthUiClient.signIn()
                                         launcher.launch(
@@ -139,11 +141,12 @@ class MainActivity : ComponentActivity() {
                                                 signInIntentSender ?: return@launch
                                             ).build()
                                         )
-
-
                                     }
                                 }
                             )
+                        }
+                        composable("registerScreen"){
+                            RegisterScreen(navController)
                         }
                         composable(route = "profile") {
                             ProfileScreen(userData = googleAuthUiClient.getSignedInUser(),

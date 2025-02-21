@@ -70,7 +70,7 @@ class GoogleAuthUiClient(
             oneTapClient.signOut().await()
             auth.signOut()
             // Firebase'in gerçekten güncellendiğinden emin olmak için bekleyelim
-            repeat(5) { // 5 defaya kadar deneme yap
+            repeat(5) {
                 delay(500) // 500ms bekle
                 if (auth.currentUser == null) {
                     return // Kullanıcı gerçekten null olduysa çık
