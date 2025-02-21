@@ -89,41 +89,43 @@ import kotlin.math.sin
 
 
 @Composable
-fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverViewModel : DiscoverViewModel) {
+fun HomeScreen(navController: NavController, viewModel: MovieViewModel, discoverViewModel: DiscoverViewModel) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
     val searchViewModel = SearchViewModel()
-    var isSearchActive by remember { mutableStateOf(false) } // Arama açık mı kontrolü
-    var currentUser =FirebaseAuth.getInstance().currentUser
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.Black)) {
+    var isSearchActive by remember { mutableStateOf(false) }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(Modifier.size(40.dp))
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                horizontalArrangement = Arrangement.Center,
+                horizontalArrangement = Arrangement.SpaceBetween, // Arama ve Profil butonunu ayırmak için
                 verticalAlignment = Alignment.CenterVertically
-            ){
+            ) {
                 Text(
-                    "What do you want to watch?", color = Color.White, fontSize = 22.sp,
-                    modifier = Modifier.padding(top = 30.dp, bottom = 15.dp, start = 60.dp)
+                    "What do you want to watch?",
+                    color = Color.White,
+                    fontSize = 22.sp,
+                    modifier = Modifier.padding(top = 30.dp, bottom = 15.dp, start = 16.dp) // Start padding eklendi
                 )
+
+                // Profil Butonu
                 IconButton(onClick = { navController.navigate("profile") }) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Profile",
                         tint = Color.White,
-                        modifier = Modifier
-                            .size(30.dp)
-                            .padding(top = 3.dp)
+                        modifier = Modifier.size(30.dp)
                     )
                 }
-
             }
-
 
             SearchScreen(
                 searchViewModel,
@@ -131,9 +133,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                 onSearchActiveChange = { isSearchActive = it }
             )
 
-            if (!isSearchActive) { // **Sadece arama açık değilse diğer bileşenleri göster**
-
-
+            if (!isSearchActive) {
                 // Sekmeler (Movies - TV Shows)
                 TabRow(
                     selectedTabIndex = selectedTab,
@@ -143,7 +143,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                         TabRowDefaults.Indicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
                             height = 2.dp,
-                            color = Color.White // İndicator rengi
+                            color = Color.White
                         )
                     }
                 ) {
@@ -170,21 +170,16 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel,discoverV
                     }
                 }
 
-
                 // Seçili Sekmeye Göre İçerik
                 if (selectedTab == 0) {
                     MovieList(navController, viewModel)
                 } else {
                     TVShowList(navController, viewModel)
                 }
-
-
             }
-
         }
     }
 }
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSearchActiveChange: (Boolean) -> Unit) {
@@ -515,8 +510,6 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
     val nowPlayingTVShows  =viewModel.nowPlayingTVShows
     var selectedTab1 by remember { mutableStateOf(0) }
     val showTabs = listOf("Popular", "Top Rated", "Now Playing")
-    viewModel.watchedItems()
-    val watchedTVShows by viewModel.watchedTVShows.observeAsState(emptyList())
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.Black)) {
@@ -548,12 +541,7 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
             1 -> TopRatedShowSection(navController, topRatedTVShows)
             2 -> NowPlayingShowSection(navController, nowPlayingTVShows )
         }
-        Spacer(Modifier.height(16.dp))
-        LazyRow {
-            items(watchedTVShows) { show ->
-                TvShowItemForSave(show, navController)
-            }
-        }
+
     }
 
 }

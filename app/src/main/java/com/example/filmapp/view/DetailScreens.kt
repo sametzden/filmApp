@@ -122,8 +122,6 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
             Image(
                 painter = rememberImagePainter(
                     data = "https://image.tmdb.org/t/p/original${movie.backdrop_path}",
-
-
                 ),
                 contentDescription = movie.title,
                 modifier = Modifier.fillMaxSize(),
@@ -163,7 +161,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                                 .height(350.dp)
                                 .clip(RoundedCornerShape(16.dp))
                                 .shadow(8.dp, shape = RoundedCornerShape(16.dp)), // Gölge
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.Fit
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
@@ -180,23 +178,20 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                                 ),
                                 color = Color.White
                             )
-
-                            Spacer(modifier = Modifier.width(16.dp))
-
-                            // Puan rozeti
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        if (movie.vote_average!! > 7) Color.Green else if (movie.vote_average!! > 5) Color.Yellow else Color.Red,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .padding(4.dp)
-                            ) {
-                                Text(
-                                    text = String.format("%.1f", movie.vote_average),
-                                    color = Color.White
+                        }
+                        // Puan rozeti
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (movie.vote_average!! > 7) Color.Green else if (movie.vote_average!! > 5) Color.Yellow else Color.Red,
+                                    shape = RoundedCornerShape(8.dp)
                                 )
-                            }
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = String.format("%.1f", movie.vote_average),
+                                color = Color.White
+                            )
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
@@ -262,7 +257,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
     }
 }
 
-// ... (Diğer composable'lar aynı kalır)
+
 
 @Composable
 fun InfoRow(label: String, value: String) {
@@ -308,8 +303,9 @@ fun ActorItem(actor: CastMember, navController: NavController) {
 }
 
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel(),navController: NavController) {
+fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel(), navController: NavController) {
     val tvShowDetail by movieViewModel.tvShowDetail.observeAsState()
     val cast by movieViewModel.showCast
     val showForSave by movieViewModel.show.observeAsState()
@@ -325,9 +321,7 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
         }
         movieViewModel.checkIfItemIsWatched(tvShowId,"tvShow") { watched->
             isWatched = watched
-
         }
-
     }
 
     tvShowDetail?.let { tvShow ->
@@ -336,102 +330,145 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
                 .fillMaxSize()
                 .background(Color.Black)
         ) {
-            // Arka plan resmi (tam ekran)
+            // Arka plan resmi (bulanıklaştırılmış ve gradyanlı)
             Image(
-                painter = rememberImagePainter("https://image.tmdb.org/t/p/original${tvShow.backdrop_path}"), // Orijinal boyut
+                painter = rememberImagePainter(
+                    data = "https://image.tmdb.org/t/p/original${tvShow.backdrop_path}"
+                ),
                 contentDescription = tvShow.name,
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                alpha = 0.4f // Şeffaflık ayarı
+                alpha = 0.5f // Şeffaflık
             )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Black.copy(alpha = 0.7f), Color.Transparent),
+                            startY = 0f,
+                            endY = 0.3f
+                        )
+                    )
+            ) {
+
+            }
+
+            // İçerik (kaydırılabilir)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
                 item {
-
-
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth()
                     ) {
+                        // Poster resmi (gölgeli)
                         Image(
                             painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${tvShow.poster_path}"),
                             contentDescription = tvShow.name,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(300.dp)
-                                .clip(RoundedCornerShape(12.dp)),
+                                .height(350.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .shadow(8.dp, shape = RoundedCornerShape(16.dp)), // Gölge
                             contentScale = ContentScale.Fit
                         )
 
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        Text(
-                            text = tvShow.name,
-                            color = Color.White,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        IconButton(onClick = {
-                            showForSave?.let { movieViewModel.toggleSaveItem(it, "tvShow") }
-                            isSaved = !isSaved
-                        }) {
-                            Icon(
-                                imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
-                                contentDescription = if (isSaved) "Kaydedildi" else "Kaydet",
-                                tint = Color.White // İkon rengini beyaz yap
+                        // Başlık ve detaylar (puan rozeti ile)
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = tvShow.name,
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontFamily = FontFamily.Serif // Daha şık bir font
+                                ),
+                                color = Color.White,
+                                modifier = Modifier.weight(1f) // Başlık ağırlığı
+                            )
+
+                            Spacer(modifier = Modifier.width(16.dp))
+
+
+                        }
+                        // Puan rozeti
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    if (tvShow.vote_average!! > 7) Color.Green else if (tvShow.vote_average!! > 5) Color.Yellow else Color.Red,
+                                    shape = RoundedCornerShape(8.dp)
+                                )
+                                .padding(4.dp)
+                        ) {
+                            Text(
+                                text = String.format("%.1f", tvShow.vote_average),
+                                color = Color.White
                             )
                         }
-
                         Spacer(modifier = Modifier.height(8.dp))
-                        Button(
-                            onClick = {
+
+                        // Kaydetme ve İzleme Butonları (ikonlu ve animasyonlu)
+                        Row {
+                            IconButton(onClick = {
+                                showForSave?.let { movieViewModel.toggleSaveItem(it, "tvShow") }
+                                isSaved = !isSaved
+                            }) {
+                                Icon(
+                                    imageVector = if (isSaved) Icons.Filled.Bookmark else Icons.Filled.BookmarkBorder,
+                                    contentDescription = if (isSaved) "Kaydedildi" else "Kaydet",
+                                    tint = Color.White
+                                )
+                            }
+                            Button(onClick = {
                                 showForSave?.let { movieViewModel.toggleWatchedItem(it, "tvShow") }
                                 isWatched = !isWatched
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Gray.copy(alpha = 0.5f)
-                            )
-                        ) {
-
-                            Text(if (isWatched) "İzledim" else "İzlemedim", color = Color.White)
-
+                            }) {
+                                Text(if (isWatched) "İzledim" else "İzlemedim", color = Color.White)
+                            }
                         }
+
                         // Diğer bilgiler
                         InfoRow("Sezon Sayısı:", "${tvShow.number_of_seasons}")
                         InfoRow("Puan", String.format("%.1f", tvShow.vote_average))
                         InfoRow("Toplam Bölüm Sayısı:", "${tvShow.number_of_episodes}")
+                        InfoRow("Durum", tvShow.status ?: "Bilinmiyor") // Durum bilgisi
 
-                        Text(
-                            text = ": ${tvShow.vote_average} (${tvShow.vote_count} oy)",
-                            color = Color.White
-                        )
-                        Text(text = "Durum: ${tvShow.status}", color = Color.White)
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Özet (paragraf stili)
                         Text(
                             text = tvShow.overview,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(bottom = 16.dp), color = Color.White
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                color = Color.LightGray,
+                                textAlign = TextAlign.Justify // Paragraf stili
+                            ),
+                            modifier = Modifier.fillMaxWidth()
                         )
 
-                        Text(
-                            text = "First Air Date: ${tvShow.first_air_date}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 16.dp), color = Color.White
-                        )
-                        Row {
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Türler (çip şeklinde)
+                        FlowRow(
+                            modifier = Modifier.horizontalScroll(rememberScrollState())
+                        ) {
                             tvShow.genres?.forEach { genre ->
                                 GenreChip(genre.name)
+                                Spacer(modifier = Modifier.width(8.dp))
                             }
                         }
 
-                        Column {
-                            Text("Oyuncular", fontSize = 22.sp, color = Color.White)
-                            LazyRow {
-                                items(cast) { actor ->
-                                    ActorItem(actor, navController)
-                                }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Oyuncular (yatay kaydırma ve kartlar)
+                        Text("Oyuncular", fontSize = 20.sp, color = Color.White)
+                        LazyRow {
+                            items(cast) { actor ->
+                                ActorItem(actor, navController) // Oyuncu kartı
                             }
                         }
                     }
@@ -440,7 +477,6 @@ fun TVShowDetailScreen(tvShowId: Int, movieViewModel: MovieViewModel = viewModel
         }
     }
 }
-
 @Composable
 fun ActorDetailScreen(actorId: Int, navController: NavController) {
     val viewModel: MovieViewModel = viewModel()

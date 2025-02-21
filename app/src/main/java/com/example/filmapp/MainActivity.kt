@@ -83,11 +83,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-
             FilmAppTheme {
-
                 val navController = rememberNavController()
-                val bottomBarScreens = listOf("homeScreen", "explore", "saved", "profile")
+                val bottomBarScreens = listOf("homeScreen", "explore", "saved", "profile","watched")
                 val currentBackStackEntry = navController.currentBackStackEntryAsState().value
                 val currentRoute = currentBackStackEntry?.destination?.route
                 Scaffold(
@@ -102,9 +100,8 @@ class MainActivity : ComponentActivity() {
                             val signViewModel = viewModel<SignInViewModel>()
                             val state by signViewModel.state.collectAsStateWithLifecycle()
                             LaunchedEffect(key1 = Unit) {
-                                if (googleAuthUiClient.getSignedInUser() != null) {
-
-                                    navController.navigate("homeScreen")
+                                if (FirebaseAuth.getInstance().currentUser != null) {
+                                       navController.navigate("homeScreen")
                                 }
                             }
                             val launcher = rememberLauncherForActivityResult(
@@ -137,7 +134,6 @@ class MainActivity : ComponentActivity() {
                                 onSignInClick = {
                                     lifecycleScope.launch {
                                         val signInIntentSender = googleAuthUiClient.signIn()
-
                                         launcher.launch(
                                             IntentSenderRequest.Builder(
                                                 signInIntentSender ?: return@launch
@@ -150,7 +146,7 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(route = "profile") {
-                            ProfileScreen(viewModel1,navController,userData = googleAuthUiClient.getSignedInUser(),
+                            ProfileScreen(userData = googleAuthUiClient.getSignedInUser(),
                                 onSignOut = {
                                     lifecycleScope.launch {
                                         googleAuthUiClient.signOut()

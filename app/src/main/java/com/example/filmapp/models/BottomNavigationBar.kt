@@ -29,7 +29,7 @@ fun BottomNavBar(navController: NavController) {
         BottomNavItem(null, Icons.Filled.Search, "explore"),
         BottomNavItem(null,Icons.Outlined.BookmarkBorder,"saved"),
         BottomNavItem(null,Icons.Default.History,"watched"),
-        BottomNavItem(null, Icons.Filled.Person, "profile")
+        //BottomNavItem(null, Icons.Filled.Person, "profile")
     )
 
     var selectedItem by rememberSaveable { mutableStateOf(0) }

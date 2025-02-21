@@ -1,8 +1,10 @@
 package com.example.filmapp.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -10,6 +12,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,38 +35,44 @@ fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
 
-    Column {
-
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) { // Arka plan rengini Column'a taşıdık
         TabRow(
             selectedTabIndex = selectedTab,
-            Modifier.background(color = Color.Black),
-            containerColor = Color.Black
+            containerColor = Color.Black, // Container rengini buraya taşıdık
+            indicator = { tabPositions -> // Indicator rengini özelleştirebilirsiniz
+                TabRowDefaults.Indicator(
+                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
+                    color = Color.White // Örnek: Beyaz bir indicator
+                )
+            }
+
         ) {
             tabs.forEachIndexed { index, title ->
-                Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
-                    Text(title, color = Color.White)
-                }
+                Tab(
+                    selected = selectedTab == index,
+                    onClick = { selectedTab = index },
+                    text = { Text(title, color = Color.White) } // Text rengini burada ayarladık
+                )
             }
         }
 
-        Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            LazyRow  {
-                // Seçili Sekmeye Göre İçerik
-                if (selectedTab == 0) {
-                    items(watchedMovies) { movie ->
-                        MovieItemForSave(movie, navController)
-                    }
-                }else{
-                    items(watchedTVShows) { show ->
-                        TvShowItemForSave(show, navController)
-                    }
+        // LazyVerticalGrid
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 128.dp), // Uyarlanabilir grid
+            modifier = Modifier.fillMaxSize().padding(16.dp), // Padding eklendi
+            verticalArrangement = Arrangement.spacedBy(16.dp), // Öğeler arası dikey boşluk
+            horizontalArrangement = Arrangement.spacedBy(16.dp)  // Öğeler arası yatay boşluk
+        ) {
+            if (selectedTab == 0) {
+                items(watchedMovies) { movie ->
+                    MovieItemForSave(movie, navController)
                 }
-
+            } else {
+                items(watchedTVShows) { show ->
+                    TvShowItemForSave(show, navController)
+                }
             }
-
         }
-
-
     }
 }
 

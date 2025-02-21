@@ -30,15 +30,13 @@ import com.example.filmapp.view.WatchedScreen
 
 @Composable
 fun ProfileScreen(
-    viewModel: MovieViewModel,
-    navController : NavController,
     userData: UserData?,
     onSignOut: () -> Unit
 ) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(color = Color.Black),
+        modifier = Modifier.fillMaxSize().background(color = Color.Black),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         if(userData?.profilePictureUrl != null) {
             AsyncImage(
@@ -56,7 +54,6 @@ fun ProfileScreen(
                 text = userData.username,
                 textAlign = TextAlign.Center,
                 fontSize = 36.sp,
-                color = Color.White,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -64,11 +61,5 @@ fun ProfileScreen(
         Button(onClick = onSignOut) {
             Text(text = "Sign out")
         }
-        Spacer(Modifier.height(16.dp))
-        Text(text= "İzlediklerim", color = Color.White )
-
-
-
     }
-
 }
