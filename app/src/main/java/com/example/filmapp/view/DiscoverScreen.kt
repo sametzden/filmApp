@@ -63,6 +63,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -72,6 +74,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.filmapp.R
 
 import com.example.filmapp.data.MovieDetailForDiscover
 
@@ -137,7 +140,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
     // Main content with drawer
     ModalDrawer(
         drawerState = drawerState,
-        drawerBackgroundColor = Color(0xFF121212),
+        drawerBackgroundColor = Color.Transparent,
         drawerContent = {
             FilterDrawerContent(
                 selectedTab = selectedTab,
@@ -170,6 +173,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
         }
     ) {
         Scaffold(
+
             topBar = {
                 TopAppBar(
                     title = { Text("Discover", color = Color.White) },
@@ -183,21 +187,33 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Black
+                        containerColor = Color.Transparent
                     )
                 )
             }
         ) { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo),
+                    "",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop,
+                    alpha = 0.5f // Şeffaflık
+                )
             Column(
                 Modifier
-                    .padding(paddingValues)
-                    .background(color = Color.Black)
+                    .padding(0.dp)
+                    .background(color = Color.Transparent)
                     .fillMaxSize()
             ) {
                 // Tabs for Movies/TV Shows
                 TabRow(
                     selectedTabIndex = selectedTab,
-                    containerColor = Color.Black
+                    containerColor = Color.Transparent,
                 ) {
                     tabs.forEachIndexed { index, title ->
                         Tab(
@@ -211,14 +227,14 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                                 } else if (selectedMood.isNotEmpty()) {
                                     viewModel.fetchByMood(selectedMood, index)
                                 } else {
-                                   // if (index == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
+                                    // if (index == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
                                 }
                             }
                         ) {
                             Text(
                                 title,
                                 color = Color.White,
-                                modifier = Modifier.padding(vertical = 12.dp)
+                                modifier = Modifier.padding(paddingValues = paddingValues)
                             )
                         }
                     }
@@ -231,11 +247,11 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                     selectedMood = selectedMood,
                     onClearGenre = {
                         selectedGenre = null
-                       // if (selectedTab == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
+                        // if (selectedTab == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
                     },
                     onClearMood = {
                         selectedMood = ""
-                      //  if (selectedTab == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
+                        //  if (selectedTab == 0) viewModel.fetchMovies() else viewModel.fetchTvShows()
                     }
                 )
 
@@ -249,6 +265,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                 }
             }
         }
+    }
     }
 }
 
@@ -302,7 +319,7 @@ fun FilterChip(text: String, onClear: () -> Unit) {
     Surface(
         modifier = Modifier.padding(end = 8.dp, bottom = 8.dp),
         shape = RoundedCornerShape(16.dp),
-        color = Color(0xFF1E88E5)
+        color = Color.Transparent
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -345,7 +362,7 @@ fun FilterDrawerContent(
         Modifier
             .fillMaxHeight()
             .width(280.dp)
-            .background(Color(0xFF121212))
+            .background(Color.Transparent)
             .padding(16.dp)
     ) {
         Text(
@@ -359,7 +376,7 @@ fun FilterDrawerContent(
         // Filter type tabs
         TabRow(
             selectedTabIndex = currentFilterTab,
-            containerColor = Color(0xFF1E1E1E)
+            containerColor = Color.Transparent
         ) {
             filterTabs.forEachIndexed { index, title ->
                 Tab(
@@ -588,7 +605,7 @@ fun MovieList(movies: List<MovieDetailForDiscover>, navController: NavController
         columns = GridCells.Adaptive(minSize = 150.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.Transparent)
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -641,7 +658,7 @@ fun TVShowList(tvShows: List<TvShowDetailForDiscover>, navController: NavControl
         columns = GridCells.Adaptive(minSize = 150.dp),
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.Transparent)
             .padding(8.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)

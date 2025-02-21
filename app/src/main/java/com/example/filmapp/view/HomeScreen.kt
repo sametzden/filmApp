@@ -69,6 +69,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,6 +78,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
+import com.example.filmapp.R
 import com.example.filmapp.data.MediaItem
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.Person
@@ -100,6 +102,12 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel, discover
             .fillMaxSize()
             .background(Color.Black)
     ) {
+        Image(painter = painterResource(id = R.drawable.logo),
+            "",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f // Şeffaflık
+        )
         Column(modifier = Modifier.fillMaxSize()) {
             Spacer(Modifier.size(40.dp))
             Row(
@@ -137,8 +145,8 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel, discover
                 // Sekmeler (Movies - TV Shows)
                 TabRow(
                     selectedTabIndex = selectedTab,
-                    modifier = Modifier.background(color = Color.Black),
-                    containerColor = Color.Black,
+                    modifier = Modifier.background(color = Color.Transparent),
+                    containerColor = Color.Transparent,
                     indicator = { tabPositions ->
                         TabRowDefaults.Indicator(
                             modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTab]),
@@ -248,7 +256,7 @@ fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSea
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 56.dp)
-                    .background(Color.DarkGray, shape = RoundedCornerShape(8.dp))
+                    .background(Color.Transparent, shape = RoundedCornerShape(8.dp))
                     .border(1.dp, Color.Gray, shape = RoundedCornerShape(8.dp))
                     .align(Alignment.TopStart)
             ) {
@@ -337,21 +345,21 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
+            .background(Color.Transparent)
     ) {
         item {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black)
             ) {
                 // TabRow ekleniyor
                 TabRow(
                     selectedTabIndex = selectedTab,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(color = Color.Black),
-                    containerColor = Color.Black,
-                    contentColor = Color.Black
+                        .background(color = Color.Transparent),
+                    containerColor = Color.Transparent,
+                    contentColor = Color.Transparent
                 ) {
                     movieTabs.forEachIndexed { index, title ->
                         Tab(
@@ -512,15 +520,15 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
     val showTabs = listOf("Popular", "Top Rated", "Now Playing")
     Column(modifier = Modifier
         .fillMaxSize()
-        .background(Color.Black)) {
+        .background(Color.Transparent)) {
         // TabRow ekleniyor
         TabRow(
             selectedTabIndex = selectedTab1,
             modifier = Modifier
                 .fillMaxWidth()
-                .background(color = Color.Black),
-            containerColor = Color.Black,
-            contentColor = Color.Black
+                .background(color = Color.Transparent),
+            containerColor = Color.Transparent,
+            contentColor = Color.Transparent
         ) {
             showTabs.forEachIndexed { index, title ->
                 Tab(

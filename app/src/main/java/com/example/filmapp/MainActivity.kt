@@ -65,16 +65,12 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private val viewModel1: MovieViewModel by viewModels()
     private lateinit var discoverViewModel: DiscoverViewModel
-
-
-
     private val googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
             oneTapClient = Identity.getSignInClient(applicationContext)
         )
     }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         println(googleAuthUiClient.getSignedInUser()?.username)
         println("oncreate")

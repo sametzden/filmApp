@@ -1,6 +1,7 @@
 package com.example.filmapp.presentation.sign_in
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,10 +25,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.filmapp.R
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
@@ -54,81 +58,96 @@ fun SignInScreen(
     var password by remember { mutableStateOf("") }
     val auth = FirebaseAuth.getInstance()
 
-    Column(
+    Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .background(color = Color.Black),
-        verticalArrangement = Arrangement.Center
+            .background(Color.Black)
     ) {
-        Text(
-            text = "Login",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 32.dp)
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            "",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f // Şeffaflık
         )
-
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
-            visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(
-            onClick = {
-                if (email.isNotEmpty() && password.isNotEmpty()) {
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT)
-                                    .show()
-                                navController.navigate("homeScreen")
-                            } else {
-                                Toast.makeText(
-                                    context,
-                                    "Login failed: ${task.exception?.localizedMessage}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                } else {
-                    Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Login")
-        }
-
-        TextButton(
-            onClick = {navController.navigate("registerScreen")},
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Don't have an account? Register")
-        }
-        Box(
+        Column(
             modifier = Modifier
-                .background(color = Color.Black),
-            contentAlignment = Alignment.Center
+                .fillMaxSize()
+                .padding(16.dp)
+                .background(color = Color.Transparent),
+            verticalArrangement = Arrangement.Center
         ) {
-            Button(onClick = onSignInWithGoogleClick) {
-                Text(text = "Sign in With Google")
-            }
-        }
 
+            Text(
+                text = "Login",
+                color = Color.White,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(bottom = 32.dp)
+            )
+
+            OutlinedTextField(
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = { Text("Password") },
+                visualTransformation = PasswordVisualTransformation(),
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (email.isNotEmpty() && password.isNotEmpty()) {
+                        auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Login successful!", Toast.LENGTH_SHORT)
+                                        .show()
+                                    navController.navigate("homeScreen")
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Login failed: ${task.exception?.localizedMessage}",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Login")
+            }
+
+            TextButton(
+                onClick = { navController.navigate("registerScreen") },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Don't have an account? Register")
+            }
+            Box(
+                modifier = Modifier
+                    .background(color = Color.Transparent)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Button(onClick = onSignInWithGoogleClick) {
+                    Text(text = "Sign in With Google")
+                }
+            }
+
+        }
     }
 }
-
 

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -19,6 +21,11 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -34,13 +41,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.filmapp.R
 import com.example.filmapp.data.Movie
 import com.example.filmapp.data.movieForSave
 import com.example.filmapp.data.showForSave
@@ -53,129 +64,165 @@ fun SavedScreen(viewModel: MovieViewModel,navController: NavController) {
     val savedTvShows by viewModel.savedTvShows.observeAsState(emptyList())
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("Movies", "TV Shows")
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            "",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f // Şeffaflık
+        )
+        Column {
 
-    Column {
-
-        TabRow(
-            selectedTabIndex = selectedTab,
-            Modifier.background(color = Color.Black),
-            containerColor = Color.Black
-        ) {
-            tabs.forEachIndexed { index, title ->
-                Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
-                    Text(title, color = Color.White)
-                }
-            }
-        }
-
-        Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
-                modifier = Modifier.fillMaxSize()
+            TabRow(
+                selectedTabIndex = selectedTab,
+                Modifier.background(color = Color.Transparent),
+                containerColor = Color.Transparent
             ) {
-                // Seçili Sekmeye Göre İçerik
-                if (selectedTab == 0) {
-                    items(savedMovies) { movie ->
-
-                        MovieItemForSave(movie, navController)
-                    }
-                } else {
-                    items(savedTvShows) { show ->
-                        TvShowItemForSave(show, navController)
+                tabs.forEachIndexed { index, title ->
+                    Tab(selected = selectedTab == index, onClick = { selectedTab = index }) {
+                        Text(title, color = Color.White)
                     }
                 }
+            }
 
+            Column(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    // Seçili Sekmeye Göre İçerik
+                    if (selectedTab == 0) {
+                        items(savedMovies) { movie ->
+
+                            MovieItemForSave(movie, navController)
+                        }
+                    } else {
+                        items(savedTvShows) { show ->
+                            TvShowItemForSave(show, navController)
+                        }
+                    }
+
+                }
             }
         }
+
     }
-
-
 }
 
 @Composable
 fun MovieItemForSave(movie: movieForSave, navController: NavController) {
     // Yatay listede her öğe için bir Row oluşturuyoruz
-    Column(
+    Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(150.dp)
+            .width(180.dp) // Genişlik arttırıldı
             .clickable {
-                // Tıklanan film detaylarına yönlendiriyoruz
                 navController.navigate("movieDetail/${movie.id}")
-            }// Poster genişliğini sabit tutuyoruz
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp) // Köşe yuvarlama arttırıldı
     ) {
-
-        // Filmin posterini gösteriyoruz
-        Image(
-
-            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
-            contentDescription = movie.title,
+        Box(
             modifier = Modifier
-                .height(250.dp)  // Poster yüksekliği
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))  // Yuvarlatılmış köşeler
-                .shadow(8.dp, shape = RoundedCornerShape(12.dp))  // Hafif gölge efekti
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Filmin adı
-        movie.title?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                modifier = Modifier.padding(horizontal = 4.dp),
-                color = Color.White
-
+                .height(280.dp) // Yükseklik arttırıldı
+        ) {
+            Image(
+                painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${movie.poster_path}"),
+                contentDescription = movie.title,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
+
+            // Başlık ve Puan (Resim üzerine entegre)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient( // Gradyan arka plan
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = movie.title ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy( // Başlık boyutu büyütüldü
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
         }
-
-
     }
 }
 
 @Composable
 fun TvShowItemForSave(show: showForSave, navController: NavController) {
-    // Yatay listede her öğe için bir Row oluşturuyoruz
-    Column(
+    Card(
         modifier = Modifier
             .padding(8.dp)
-            .width(150.dp)
+            .width(180.dp) // Genişlik arttırıldı
             .clickable {
-                // Tıklanan film detaylarına yönlendiriyoruz
                 navController.navigate("tvShowDetail/${show.id}")
-            }// Poster genişliğini sabit tutuyoruz
+            },
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(16.dp) // Köşe yuvarlama arttırıldı
     ) {
-
-        // Filmin posterini gösteriyoruz
-        Image(
-
-            painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${show.poster_path}"),
-            contentDescription = show.name,
+        Box(
             modifier = Modifier
-                .height(250.dp)  // Poster yüksekliği
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))  // Yuvarlatılmış köşeler
-                .shadow(8.dp, shape = RoundedCornerShape(12.dp))  // Hafif gölge efekti
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Filmin adı
-        show.name?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis, // Uzun başlıklar kesilecek
-                modifier = Modifier.padding(horizontal = 4.dp),
-                color = Color.White
-
+                .height(280.dp) // Yükseklik arttırıldı
+        ) {
+            Image(
+                painter = rememberImagePainter("https://image.tmdb.org/t/p/w500${show.poster_path}"),
+                contentDescription = show.name,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
             )
+
+            // Başlık ve Puan (Resim üzerine entegre)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient( // Gradyan arka plan
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.7f)
+                            )
+                        )
+                    )
+                    .padding(16.dp)
+            ) {
+                Column {
+                    Text(
+                        text = show.name ?: "",
+                        style = MaterialTheme.typography.bodyLarge.copy( // Başlık boyutu büyütüldü
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = Color.White,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+
+                }
+
+            }
         }
-
-
     }
 }

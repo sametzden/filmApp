@@ -138,9 +138,7 @@ fun MovieDetailScreen(movieId: Int, movieViewModel: MovieViewModel = viewModel()
                             endY = 0.3f
                         )
                     )
-            ) {
-
-            }
+            )
 
             // İçerik (kaydırılabilir)
             LazyColumn(
