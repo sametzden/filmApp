@@ -1,6 +1,8 @@
 package com.example.filmapp.view
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,6 +22,9 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.example.filmapp.R
 import com.example.filmapp.data.movieForSave
 import com.example.filmapp.models.MovieCategory
 import com.example.filmapp.models.MovieViewModel
@@ -37,36 +42,47 @@ fun SeeAllMoviesScreen(viewModel: MovieViewModel, category: MovieCategory?, navC
     LaunchedEffect(category) {
         category?.let { viewModel.selectCategory(it) } // Seçili kategoriye göre veri çek
     }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            "",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f // Şeffaflık
+        )
+        Column(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+                modifier = Modifier.fillMaxSize()
+            ) {
+                if (category != null) {
+                    items(movies) { movie ->
+                        MovieItem(
+                            movie = movie,
+                            navController = navController,
 
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
-            modifier = Modifier.fillMaxSize()
-        ) {
-            if(category!= null){
-                items(movies) { movie ->
-                    MovieItem(
-                        movie = movie,
-                        navController = navController,
-
-                        )
+                            )
+                    }
                 }
-            }
-            item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
-                Button(
-                    onClick = { viewModel.loadMovies() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Red)
-                ) {
-                    Text("Daha Fazla Yükle", color = Color.White)
+                item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
+                    Button(
+                        onClick = { viewModel.loadMovies() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        Text("Daha Fazla Yükle", color = Color.White)
+                    }
                 }
             }
         }
     }
 }
-
 
 @Composable
 fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory?, navController: NavController) {
@@ -79,32 +95,43 @@ fun SeeAllTVShowsScreen(viewModel: MovieViewModel, category: MovieCategory?, nav
     LaunchedEffect(category) {
         category?.let { viewModel.selectTvCategory(it) } // Seçili kategoriye göre veri çek
     }
-
-    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(shows) { show ->
-                TVShowItem(
-                    tvShow = show,
-                    navController = navController,
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.logo),
+            "",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.5f // Şeffaflık
+        )
+        Column(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(minSize = 150.dp), // Minimum item genişliği
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(shows) { show ->
+                    TVShowItem(
+                        tvShow = show,
+                        navController = navController,
                     )
-            }
+                }
 
-            item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
-                Button(
-                    onClick = { viewModel.loadMoreTvShows() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    colors = ButtonDefaults.buttonColors(Color.Red)
-                ) {
-                    Text("Daha Fazla Yükle", color = Color.White)
+                item(span = { GridItemSpan(maxLineSpan) }) { // Buton tüm genişliği kaplasın
+                    Button(
+                        onClick = { viewModel.loadMoreTvShows() },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(Color.Red)
+                    ) {
+                        Text("Daha Fazla Yükle", color = Color.White)
+                    }
                 }
             }
         }
     }
-
 
 }

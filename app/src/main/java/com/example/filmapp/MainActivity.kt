@@ -55,6 +55,7 @@ import com.example.filmapp.presentation.sign_in.SignInScreen
 import com.example.filmapp.ui.theme.FilmAppTheme
 import com.example.filmapp.view.DiscoverScreen
 import com.example.filmapp.view.SavedScreen
+import com.example.filmapp.view.SplashScreen
 import com.example.filmapp.view.WatchedScreen
 
 import com.google.android.gms.auth.api.identity.Identity
@@ -92,7 +93,7 @@ class MainActivity : ComponentActivity() {
                     }
                 ) {innerPadding->
                     // NavHost ile yönlendirme yapılacak
-                    NavHost(navController = navController, startDestination = "sign_in", modifier = Modifier.padding(innerPadding)) {
+                    NavHost(navController = navController, startDestination = "splashScreen", modifier = Modifier.padding(innerPadding)) {
                         composable("sign_in") {
                             val signViewModel = viewModel<SignInViewModel>()
                             val state by signViewModel.state.collectAsStateWithLifecycle()
@@ -140,6 +141,9 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             )
+                        }
+                        composable("splashScreen") {
+                            SplashScreen(navController)
                         }
                         composable("registerScreen"){
                             RegisterScreen(navController)
