@@ -5,6 +5,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.icons.Icons
@@ -22,10 +25,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.filmapp.R
 
@@ -37,34 +44,38 @@ fun BottomNavBar(navController: NavController) {
         BottomNavItem(null, Icons.Filled.Search, "explore"),
         BottomNavItem(null, Icons.Outlined.BookmarkBorder, "saved"),
         BottomNavItem(null, Icons.Default.History, "watched"),
-        //BottomNavItem(null, Icons.Filled.Person, "profile")
+        // BottomNavItem(null, Icons.Filled.Person, "profile")
     )
 
     var selectedItem by rememberSaveable { mutableStateOf(0) }
 
     Box(
         modifier = Modifier
-
-            .background(Color.Black)
+            .background(color = Color(0xFF1B0708))
+            .height(70.dp)
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.bottombar),
-            "",
-            contentScale = ContentScale.Fit,
-            alpha = 0.5f // Şeffaflık
-        )
         BottomNavigation(
             backgroundColor = Color.Transparent,
-            contentColor = Color.White
+            contentColor = Color.White,
+            elevation = 10.dp
         ) {
             items.forEachIndexed { index, item ->
                 BottomNavigationItem(
-                    icon = { Icon(item.icon, contentDescription = item.title, tint = Color.White) },
+                    icon = {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.title,
+                            tint = if (selectedItem == index) Color.Cyan else Color.White,
+                            modifier = Modifier.size(30.dp) // Instagram'daki gibi büyük ikonlar
+                        )
+                    },
                     label = {
                         item.title?.let {
                             Text(
                                 it,
-                                color = if (selectedItem == index) Color.Cyan else Color.White
+                                fontSize = 12.sp, // Yazıyı küçültüp estetik hale getirdik
+                                color = if (selectedItem == index) Color.Cyan else Color.White,
+                                fontWeight = if (selectedItem == index) FontWeight.Bold else FontWeight.Normal
                             )
                         }
                     },
@@ -72,12 +83,15 @@ fun BottomNavBar(navController: NavController) {
                     onClick = {
                         selectedItem = index
                         navController.navigate(item.route)
-                    }
+                    },
+                    alwaysShowLabel = false,
+                    modifier = Modifier.padding(vertical = 10.dp)
                 )
             }
         }
     }
 }
+
 
 
 

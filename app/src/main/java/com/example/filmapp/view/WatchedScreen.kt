@@ -24,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -42,15 +43,16 @@ fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Brush.verticalGradient(colors = listOf(Color(0xFF242A32), Color(0xFF1B0505))))
     ) {
+        /*
         Image(
             painter = painterResource(id = R.drawable.logo),
             "",
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             alpha = 0.5f // Şeffaflık
-        )
+        )*/
         Column(
             modifier = Modifier.fillMaxSize().background(Color.Transparent)
         ) { // Arka plan rengini Column'a taşıdık
