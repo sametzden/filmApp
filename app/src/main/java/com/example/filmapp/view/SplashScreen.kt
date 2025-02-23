@@ -38,7 +38,7 @@ fun SplashScreen(navController: NavController) {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(colors = listOf(Color(0xFF242A32), Color(0xFF1B0505)))),
+            .background(color = Color(0xFF242A32)),
         contentAlignment = Alignment.Center
     ) {
         val alpha = remember { Animatable(0f) }
@@ -55,7 +55,7 @@ fun SplashScreen(navController: NavController) {
         }
         // Logoyu tam ekran kaplayacak şekilde ayarla
         Image(
-            painter = painterResource(id = R.drawable.lumix),
+            painter = painterResource(id = R.drawable.lumiere),
             contentDescription = "Uygulama Logosu",
             modifier = Modifier.fillMaxSize()
         )
