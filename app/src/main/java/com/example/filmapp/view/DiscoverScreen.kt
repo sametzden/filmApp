@@ -85,49 +85,49 @@ import com.example.filmapp.models.DiscoverViewModel
 import kotlinx.coroutines.launch
 
 val movieGenres = mapOf(
-    "Action" to 28,
-    "Adventure" to 12,
-    "Animation" to 16,
-    "Comedy" to 35,
-    "Crime" to 80,
-    "Documentary" to 99,
+    "Aksiyon" to 28,
+    "Macera" to 12,
+    "Animasyon" to 16,
+    "Komedi" to 35,
+    "Suç" to 80,
+    "Belgesel" to 99,
     "Drama" to 18,
-    "Family" to 10751,
-    "Fantasy" to 14,
-    "History" to 36,
-    "Horror" to 27,
-    "Music" to 10402,
-    "Mystery" to 9648,
-    "Romance" to 10749,
-    "Science Fiction" to 878,
-    "TV Movie" to 10770,
-    "Thriller" to 53,
-    "War" to 10752,
-    "Western" to 37
+    "Aile" to 10751,
+    "Fantastik" to 14,
+    "Tarih" to 36,
+    "Korku" to 27,
+    "Müzik" to 10402,
+    "Gizem" to 9648,
+    "Romantik" to 10749,
+    "Bilim Kurgu" to 878,
+    "TV Filmi" to 10770,
+    "Gerilim" to 53,
+    "Savaş" to 10752,
+    "Vahşi Batı" to 37
 )
 val showGenres = mapOf(
-    "Animation" to 16,
-    "Comedy" to 35,
-    "Crime" to 80,
-    "Documentary" to 99,
+    "Animasyon" to 16,
+    "Komedi" to 35,
+    "Suç" to 80,
+    "Belgesel" to 99,
     "Drama" to 18,
-    "Family" to 10751,
-    "Kids" to 10762,
-    "Mystery" to 9648,
-    "News" to 10763,
+    "Aile" to 10751,
+    "Çocuk" to 10762,
+    "Gizem" to 9648,
+    "Haber" to 10763,
     "Reality" to 10764,
-    "Science Fiction" to 878,
-    "Soap" to 10766,
-    "Talk" to 10767,
-    "War & Politics" to 10768,
-    "Western" to 37
+    "Bilim Kurgu" to 878,
+    "Pembe Dizi" to 10766,
+    "Talk Show" to 10767,
+    "Savaş ve Politika" to 10768,
+    "Vahşi Batı" to 37
 )
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: NavController) {
     val movies by viewModel.movies.observeAsState()
     val tvShows by viewModel.tvShows.observeAsState()
-    val tabs = listOf("Movies", "TV Shows")
+    val tabs = listOf("Filmler", "Diziler")
     var selectedTab by remember { mutableStateOf(0) }
     var selectedGenre: Int? by remember { mutableStateOf(null) }
     var minRating by remember { mutableStateOf(0f) }
@@ -177,7 +177,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
 
             topBar = {
                 TopAppBar(
-                    title = { Text("Discover", color = Color.White) },
+                    title = { Text("Keşfet", color = Color.White) },
                     navigationIcon = {
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(
@@ -202,7 +202,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
             Column(
                 Modifier
                     .padding(0.dp)
-                    .background(color = Color.Transparent)
+                    .background(Brush.verticalGradient(colors = listOf(Color(0xFF242A32), Color(0xFF1B0505))))
                     .fillMaxSize()
             ) {
                 // Tabs for Movies/TV Shows
@@ -279,7 +279,7 @@ fun AppliedFiltersSection(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
             Text(
-                text = "Applied Filters:",
+                text = "Uygulanan Filtre:",
                 color = Color.White,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
@@ -292,7 +292,7 @@ fun AppliedFiltersSection(
             ) {
                 if (selectedGenre != null) {
                     val genreMap = if (selectedTab == 0) movieGenres else showGenres
-                    val genreName = genreMap.entries.find { it.value == selectedGenre }?.key ?: "Unknown"
+                    val genreName = genreMap.entries.find { it.value == selectedGenre }?.key ?: "Bilinmeyen"
                     FilterChip(
                         text = "Genre: $genreName",
                         onClear = onClearGenre
@@ -351,7 +351,7 @@ fun FilterDrawerContent(
     onMoodSelected: (String) -> Unit
 ) {
     var currentFilterTab by remember { mutableStateOf(0) }
-    val filterTabs = listOf("Genre", "Mood")
+    val filterTabs = listOf("Tür", "Mod")
 
     Column(
         Modifier
@@ -361,7 +361,7 @@ fun FilterDrawerContent(
             .padding(16.dp)
     ) {
         Text(
-            "Discover Options",
+            "Seçenekleri İncele",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = Color.White,
@@ -398,7 +398,7 @@ fun FilterDrawerContent(
                 Spacer(modifier = Modifier.height(24.dp))
                 Column {
                     Text(
-                        "Minimum Rating: ${minRating.toInt()}",
+                        "Minimum Puan: ${minRating.toInt()}",
                         color = Color.White,
                         fontSize = 16.sp
                     )
@@ -427,7 +427,7 @@ fun GenreFilterContent(
     onGenreSelected: (Int) -> Unit
 ) {
     Text(
-        "Select Genre",
+        "Tür Seç",
         fontSize = 18.sp,
         fontWeight = FontWeight.Medium,
         color = Color.White,
@@ -518,7 +518,7 @@ fun MoodFilterContent(
     )
 
     Text(
-        "How do you feel today?",
+        "Bugün nasıl hissediyorsun?",
         fontSize = 18.sp,
         fontWeight = FontWeight.Medium,
         color = Color.White,

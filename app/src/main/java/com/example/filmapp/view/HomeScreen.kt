@@ -93,7 +93,7 @@ import kotlin.math.sin
 @Composable
 fun HomeScreen(navController: NavController, viewModel: MovieViewModel, discoverViewModel: DiscoverViewModel) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Movies", "TV Shows")
+    val tabs = listOf("Filmler", "Diziler")
     val searchViewModel = SearchViewModel()
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -113,7 +113,7 @@ fun HomeScreen(navController: NavController, viewModel: MovieViewModel, discover
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    "What do you want to watch?",
+                    "Ne izlemek istersiniz?",
                     color = Color.White,
                     fontSize = 22.sp,
                     modifier = Modifier.padding(top = 30.dp, bottom = 15.dp, start = 16.dp) // Start padding eklendi
@@ -221,7 +221,7 @@ fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSea
             TextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Search Movies & TV Shows", color = Color(0xffbdbdbd) )},
+                placeholder = { Text("Film, Dizi ve Oyuncu Ara", color = Color(0xffbdbdbd) )},
                 colors =TextFieldDefaults.textFieldColors(
                     cursorColor = Color.White,
                     focusedIndicatorColor = Color.Transparent,
@@ -310,7 +310,7 @@ fun SearchResultItem(item: MediaItem, navController: NavController) {
                 } else if (item is TVShow) {
                     item.name?.let { Text(text = it, fontSize = 18.sp, color = Color.White) }
                 }
-                Text(text ="Rating is " + item.vote_average?.toInt().toString(), fontSize = 18.sp, color = Color.White)
+                Text(text ="Puanı: " + item.vote_average?.toInt().toString(), fontSize = 18.sp, color = Color.White)
 
 
             }
@@ -332,7 +332,7 @@ fun MovieList(navController: NavController, viewModel: MovieViewModel) {
     val topRatedMovies = viewModel.topRatedMovies
     val upcomingMovies = viewModel.upcomingMovies
     var selectedTab by remember { mutableStateOf(0) }
-    val movieTabs = listOf("Popular", "Up Coming", "Top Rated", "Now Playing")
+    val movieTabs = listOf("Popüler", "Yeni Çıkacak", " En İyi Puan Alan", "Şimdi Gösterimde")
     viewModel.watchedItems()
 
 
@@ -397,12 +397,12 @@ fun PopularMoviesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Popular Movies", color = Color.White, fontSize = 18.sp)
+            Text("Popüler", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
                 navController.navigate("seeAllScreen/popularMovies")
             })
             {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -427,12 +427,12 @@ fun UpcomingMoviesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Up Coming Movies", color = Color.White, fontSize = 18.sp)
+            Text("Yeni Çıkacak", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
 
                 navController.navigate("seeAllScreen/upcomingMovies")
             }) {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -457,12 +457,12 @@ fun TopRatedMoviesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Top Rated Movies", color = Color.White, fontSize = 18.sp)
+            Text("En İyi Puan Alan", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
 
                 navController.navigate("seeAllScreen/topRatedMovies")
             }) {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -486,11 +486,11 @@ fun NowPlayingMoviesSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Now Playing Movies", color = Color.White, fontSize = 18.sp)
+            Text("Şimdi Gösterimde", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
                 navController.navigate("seeAllScreen/nowPlayingMovies")
             }) {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -512,7 +512,7 @@ fun TVShowList(navController: NavController, viewModel: MovieViewModel) {
     val topRatedTVShows =viewModel.topRatedTVShows
     val nowPlayingTVShows  =viewModel.nowPlayingTVShows
     var selectedTab1 by remember { mutableStateOf(0) }
-    val showTabs = listOf("Popular", "Top Rated", "Now Playing")
+    val showTabs = listOf("Popüler", "En İyi Puan Alan", "Şimdi Gösterimde")
     Column(modifier = Modifier
         .fillMaxSize()
         .background(Color.Transparent)) {
@@ -563,12 +563,12 @@ fun PopularShowSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Popular Shows", color = Color.White, fontSize = 18.sp)
+            Text("Popüler", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
                 navController.navigate("seeAllTVShowsScreen/popularShows")
             })
             {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -592,12 +592,12 @@ fun TopRatedShowSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Top Rated Shows", color = Color.White, fontSize = 18.sp)
+            Text("En İyi Puan Alan", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
                 navController.navigate("seeAllTVShowsScreen/topRatedShows")
             })
             {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {
@@ -620,12 +620,12 @@ fun NowPlayingShowSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text("Now Playing Shows", color = Color.White, fontSize = 18.sp)
+            Text("Şimdi Gösterimde", color = Color.White, fontSize = 18.sp)
             TextButton(onClick = {
                 navController.navigate("seeAllTVShowsScreen/nowPlayingShows")
             })
             {
-                Text("See All", color = Color.Cyan, fontSize = 14.sp)
+                Text("Tümünü Gör", color = Color.Cyan, fontSize = 14.sp)
             }
         }
         LazyRow {

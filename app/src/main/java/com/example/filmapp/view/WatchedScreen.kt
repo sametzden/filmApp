@@ -39,7 +39,7 @@ fun WatchedScreen(viewModel: MovieViewModel, navController: NavController) {
     val watchedMovies by viewModel.watchedMovies.observeAsState(emptyList())
     val watchedTVShows by viewModel.watchedTVShows.observeAsState(emptyList())
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Movies", "TV Shows")
+    val tabs = listOf("Filmler", "Diziler")
     Box(
         modifier = Modifier
             .fillMaxSize()

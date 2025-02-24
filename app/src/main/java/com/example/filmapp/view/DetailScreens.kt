@@ -482,7 +482,7 @@ fun ActorDetailScreen(actorId: Int, navController: NavController) {
     val actorMovies by viewModel.actorMovies
     val actorTVShows by viewModel.actorTVShows
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("Movies", "TV Shows")
+    val tabs = listOf("Filmler", "Diziler")
 
     LaunchedEffect(actorId) {
         viewModel.fetchActorDetails(actorId)

@@ -45,15 +45,15 @@ fun RegisterScreen(
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Create Account",
+                text = "Hesap Oluştur",
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Full Name") },
+                label = { Text("İsim") },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -67,7 +67,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Şifre") },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth()
             )
@@ -79,7 +79,7 @@ fun RegisterScreen(
                     checked = isTermsAccepted,
                     onCheckedChange = { isTermsAccepted = it }
                 )
-                Text("I accept the terms and conditions")
+                Text("Kullanım şartlarını kabul ediyorum", color = Color.White)
             }
             Spacer(modifier = Modifier.height(16.dp))
             Button(
@@ -99,20 +99,20 @@ fun RegisterScreen(
                                     }
                                 }
                         } else {
-                            Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT)
+                            Toast.makeText(context, "Lütfen tüm alanları doldurun", Toast.LENGTH_SHORT)
                                 .show()
                         }
                     } else {
                         Toast.makeText(
                             context,
-                            "Please accept the terms and conditions",
+                            "Lütfen kullanım şartlarını kabul edin",
                             Toast.LENGTH_SHORT
                         ).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Register")
+                Text("Kayıt Ol")
             }
 
             // Login seçeneği
@@ -120,7 +120,7 @@ fun RegisterScreen(
                 onClick = { navController.navigate("sign_in") },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Already have an account? Login")
+                Text("Zaten bir hesabınız var mı? Giriş yapın")
             }
         }
     }
