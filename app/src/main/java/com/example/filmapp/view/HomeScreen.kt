@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,6 +41,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -199,50 +201,52 @@ fun SearchScreen(viewModel: SearchViewModel, navController: NavController, onSea
 
     val results by viewModel.searchResults
 
-    Box {
+    Box(
+    ) {
         Row(
             modifier = Modifier
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(60.dp)
                 .background(color = Color(0x20ffffff), shape = RoundedCornerShape(50.dp))
                 .padding(horizontal = 50.dp),
-                verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier
-                    .size(30.dp)
-                    .padding(top = 3.dp)
+                modifier = Modifier.size(24.dp)
             )
-            Spacer(Modifier.width(10.dp))
-            TextField(
+            Spacer(Modifier.width(8.dp))
+            OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                placeholder = { Text("Film, Dizi ve Oyuncu Ara", color = Color(0xffbdbdbd) )},
-                colors =TextFieldDefaults.textFieldColors(
+                placeholder = { Text("Film, Dizi ve Oyuncu Ara", color = Color(0xffbdbdbd)) },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
                     cursorColor = Color.White,
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
                     focusedPlaceholderColor = Color.White,
                     focusedTextColor = Color.White,
                     containerColor = Color.Transparent,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = Color.White,
                 ),
                 modifier = Modifier
                     .fillMaxHeight()
                     .weight(1f)
                     .onFocusChanged { focusState ->
+
                         if (!focusState.isFocused) {
+
                             isDropdownVisible = false
-                            onSearchActiveChange(false) // **Odak kaybolunca HomeScreen içeriğini geri getir**
+
+                            onSearchActiveChange(false)
                         }
                     },
                 textStyle = TextStyle(color = Color.White, fontSize = 16.sp),
-                shape = RoundedCornerShape(50.dp),
-                singleLine = true
+                shape = RoundedCornerShape(24.dp),
+                singleLine = true,
             )
         }
 

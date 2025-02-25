@@ -65,12 +65,13 @@ fun ProfileScreen(
                     text = userData.username,
                     textAlign = TextAlign.Center,
                     fontSize = 36.sp,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
             Button(onClick = onSignOut) {
-                Text(text = "Sign out")
+                Text(text = "Çıkış Yap")
             }
         }
     }

@@ -40,6 +40,7 @@ import com.example.filmapp.view.MovieDetailScreen
 
 import com.example.filmapp.models.MovieViewModel
 import com.example.filmapp.models.SignInViewModel
+import com.example.filmapp.presentation.sign_in.ForgotPasswordScreen
 import com.example.filmapp.view.ActorDetailScreen
 
 import com.example.filmapp.view.SeeAllMoviesScreen
@@ -147,6 +148,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("registerScreen"){
                             RegisterScreen(navController)
+                        }
+                        composable("forgotPasswordScreen") {
+                            ForgotPasswordScreen(navController)
                         }
                         composable(route = "profile") {
                             ProfileScreen(userData = googleAuthUiClient.getSignedInUser(),

@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
@@ -45,7 +46,7 @@ import com.google.firebase.auth.ktx.auth
 @Composable
 fun SignInScreen(
     state: SignInState,
-    onSignInWithGoogleClick : ()-> Unit,
+    onSignInWithGoogleClick: () -> Unit,
     navController: NavController
 ) {
     val context = LocalContext.current
@@ -81,14 +82,17 @@ fun SignInScreen(
                 text = "Giriş Yap",
                 color = Color.White,
                 style = MaterialTheme.typography.headlineMedium,
-                modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(bottom = 32.dp)
+                    .fillMaxWidth()
             )
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
-                modifier = Modifier.fillMaxWidth()
+                label = { Text("Email", color = Color.White) },
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White) // Metin rengini beyaz yap
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -96,9 +100,10 @@ fun SignInScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Şifre") },
+                label = { Text("Şifre", color = Color.White) },
                 visualTransformation = PasswordVisualTransformation(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = TextStyle(color = Color.White) // Metin rengini beyaz yap
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -129,8 +134,9 @@ fun SignInScreen(
                 Text("Giriş yap")
             }
 
-
-
+            TextButton(onClick = { navController.navigate("forgotPasswordScreen") }) {
+                Text("Şifremi Unuttum?", color = Color.White)
+            }
 
             TextButton(
                 onClick = { navController.navigate("registerScreen") },
@@ -144,9 +150,11 @@ fun SignInScreen(
                     .background(color = Color.Transparent)
                     .fillMaxWidth(),
 
-            ) {
-                OutlinedButton (onClick = onSignInWithGoogleClick, modifier = Modifier
-                    .fillMaxWidth()) {
+                ) {
+                OutlinedButton(
+                    onClick = onSignInWithGoogleClick, modifier = Modifier
+                        .fillMaxWidth()
+                ) {
                     Text(text = "Google ile giriş yap", style = MaterialTheme.typography.titleMedium)
                 }
             }
@@ -154,4 +162,3 @@ fun SignInScreen(
         }
     }
 }
-
