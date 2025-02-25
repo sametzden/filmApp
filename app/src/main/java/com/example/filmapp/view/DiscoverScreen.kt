@@ -82,7 +82,9 @@ import com.example.filmapp.data.MovieDetailForDiscover
 import com.example.filmapp.data.TvShowDetailForDiscover
 
 import com.example.filmapp.models.DiscoverViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 
 val movieGenres = mapOf(
     "Aksiyon" to 28,
@@ -125,8 +127,8 @@ val showGenres = mapOf(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterialApi::class)
 @Composable
 fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: NavController) {
-    val movies by viewModel.movies.observeAsState()
-    val tvShows by viewModel.tvShows.observeAsState()
+    val movies = viewModel.movies
+    val tvShows = viewModel.tvShows
     val tabs = listOf("Filmler", "Diziler")
     var selectedTab by remember { mutableStateOf(0) }
     var selectedGenre: Int? by remember { mutableStateOf(null) }
@@ -149,6 +151,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                 minRating = minRating,
                 selectedMood = selectedMood,
                 onGenreSelected = { genreId ->
+                    viewModel.clearData()
                     selectedGenre = if (selectedGenre == genreId) null else genreId
                     selectedMood = "" // Clear mood when genre is selected
                     showMovieList = true
@@ -158,6 +161,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                     scope.launch { drawerState.close() } // Close drawer after selection
                 },
                 onRatingChange = { rating ->
+                    viewModel.clearData()
                     minRating = rating
                     if (selectedGenre != null) {
                         filterItems(viewModel, selectedTab, selectedGenre!!, minRating)
@@ -167,6 +171,7 @@ fun DiscoverScreen(viewModel: DiscoverViewModel = viewModel(), navController: Na
                     selectedMood = mood
                     selectedGenre = null // Clear genre when mood is selected
                     viewModel.fetchByMood(mood, selectedTab)
+
                     showMovieList = true
                     scope.launch { drawerState.close() } // Close drawer after selection
                 }

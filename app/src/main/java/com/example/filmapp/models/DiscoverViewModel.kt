@@ -1,5 +1,6 @@
 package com.example.filmapp.models
 
+import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,18 +15,19 @@ import kotlinx.coroutines.launch
 
 class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
 
-    private val _movies = MutableLiveData<List<MovieDetailForDiscover>>()
-    val movies: LiveData<List<MovieDetailForDiscover>> = _movies
+    val movies = mutableStateListOf<MovieDetailForDiscover>()
 
-    private val _tvShows = MutableLiveData<List<TvShowDetailForDiscover>>()
-    val tvShows: LiveData<List<TvShowDetailForDiscover>> = _tvShows
+
+    val tvShows = mutableStateListOf<TvShowDetailForDiscover>()
+
 
     fun fetchFilteredMovies(genres: Int?, minRating: Float?) {
         viewModelScope.launch {
             println("fetchFilteredMovies çalıştı")
-            val movieList = repository.discoverMovies(genres, minRating)
-            _movies.value = movieList
-            println("Filmler: ${movieList.size}")
+            for (page in 1..5){
+                val movieList = repository.discoverMovies(genres, minRating,page)
+                movies.addAll(movieList)
+            }
         }
     }
     private val _moodMovie = MutableLiveData<List<MovieDetailForDiscover>>()
@@ -47,13 +49,27 @@ class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
         if (selectedTab==0)
         {
             viewModelScope.launch {
-                val response = repository.discoverMovies(genreId,null)
-                _movies.value =(listOf(response.shuffled().get(1)))
+                for (page in 1..5){
+                    val response = repository.discoverMovies(genreId,null,page)
+                   // _movies.value =(listOf(response.shuffled().get(1)))
+                    movies.addAll(response)
+                }
+                val movieformood =movies.shuffled().get(1)
+                movies.clear()
+                movies.addAll(listOf(movieformood))
+
             }
         }else
-        {   viewModelScope.launch {
-                val response = repository.discoverTvShows(genreId,null)
-                _tvShows.value = (listOf(response.shuffled().get(1)))
+        {
+            viewModelScope.launch {
+            for (page in 1..5){
+                val response = repository.discoverTvShows(genreId,null,page)
+                //_tvShows.value = (listOf(response.shuffled().get(1)))
+                tvShows.addAll(response)
+            }
+            val showForMood = tvShows.shuffled().get(1)
+            tvShows.clear()
+            tvShows.addAll(listOf(showForMood))
             }
 
         }
@@ -62,13 +78,16 @@ class DiscoverViewModel(private val repository: MovieRepository) : ViewModel() {
 
     fun fetchFilteredTvShows(genres: Int?, minRating: Float?) {
         viewModelScope.launch {
-            val tvShowList = repository.discoverTvShows(genres, minRating)
-            _tvShows.value = tvShowList
+            for (page in 1..5){
+                val tvShowList = repository.discoverTvShows(genres, minRating,page)
+                tvShows.addAll(tvShowList)
+            }
+
         }
     }
     fun clearData() {
-        _movies.value = emptyList()
-        _tvShows.value = emptyList()
+        movies.clear()
+        tvShows.clear()
 
     }
 
